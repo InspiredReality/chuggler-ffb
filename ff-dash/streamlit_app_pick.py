@@ -99,6 +99,9 @@ def load_all_data():
     
     return master_df, adp_df
 
+# Move widget to main code
+debug_mode = st.sidebar.checkbox("🔍 Debug Draft Data", value=False)
+
 @st.cache_data
 def load_draft_data():
     """
@@ -110,15 +113,6 @@ def load_draft_data():
     if draft_data_path.exists():
         draft_df = pd.read_csv(draft_data_path)
         
-        # Debug: Show actual columns in sidebar
-        if st.sidebar.checkbox("🔍 Debug Draft Data", value=False):
-            st.sidebar.write("**Draft CSV Columns:**")
-            st.sidebar.write(list(draft_df.columns))
-            st.sidebar.write("**Draft CSV Shape:**")
-            st.sidebar.write(draft_df.shape)
-            st.sidebar.write("**First few rows:**")
-            st.sidebar.dataframe(draft_df.head(3))
-        
         return draft_df
     else:
         # Return empty DataFrame with expected structure
@@ -126,6 +120,21 @@ def load_draft_data():
             'year', 'round', 'pick', 'team_name', 
             'player_name', 'position', 'season_points'
         ])
+
+# Then use the widget result outside
+draft_df = load_draft_data()
+
+if debug_mode:
+    st.write("Debugging enabled.")
+    st.dataframe(draft_df)
+    # Debug: Show actual columns in sidebar
+    if st.sidebar.checkbox("🔍 Debug Draft Data", value=False):
+        st.sidebar.write("**Draft CSV Columns:**")
+        st.sidebar.write(list(draft_df.columns))
+        st.sidebar.write("**Draft CSV Shape:**")
+        st.sidebar.write(draft_df.shape)
+        st.sidebar.write("**First few rows:**")
+        st.sidebar.dataframe(draft_df.head(3))
 
 def fix_free_agent_positions(df):
     """
