@@ -100,7 +100,7 @@ def load_all_data():
     return master_df, adp_df
 
 # Move widget to main code
-debug_mode = st.sidebar.checkbox("🔍 Debug Draft Data", value=False)
+# debug_mode = st.sidebar.checkbox("🔍 Debug Draft Data", value=False)
 
 @st.cache_data
 def load_draft_data():
@@ -622,7 +622,7 @@ def main():
     st.title("🏈 Fantasy Football Analytics Dashboard")
     
     # Debug mode toggle
-    debug_mode = st.sidebar.checkbox("🐛 Debug Mode", value=False)
+    # debug_mode = st.sidebar.checkbox("🐛 Debug Mode", value=False)
     
     if debug_mode:
         st.sidebar.subheader("🔍 Debug Info")
