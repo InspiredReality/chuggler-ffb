@@ -124,17 +124,17 @@ def load_draft_data():
 # Then use the widget result outside
 draft_df = load_draft_data()
 
-if debug_mode:
-    st.write("Debugging enabled.")
-    st.dataframe(draft_df)
-    # Debug: Show actual columns in sidebar
-    if st.sidebar.checkbox("🔍 Debug Draft Data", value=False):
-        st.sidebar.write("**Draft CSV Columns:**")
-        st.sidebar.write(list(draft_df.columns))
-        st.sidebar.write("**Draft CSV Shape:**")
-        st.sidebar.write(draft_df.shape)
-        st.sidebar.write("**First few rows:**")
-        st.sidebar.dataframe(draft_df.head(3))
+# if debug_mode:
+#     st.write("Debugging enabled.")
+#     st.dataframe(draft_df)
+#     # Debug: Show actual columns in sidebar
+#     if st.sidebar.checkbox("🔍 Debug Draft Data", value=False):
+#         st.sidebar.write("**Draft CSV Columns:**")
+#         st.sidebar.write(list(draft_df.columns))
+#         st.sidebar.write("**Draft CSV Shape:**")
+#         st.sidebar.write(draft_df.shape)
+#         st.sidebar.write("**First few rows:**")
+#         st.sidebar.dataframe(draft_df.head(3))
 
 def fix_free_agent_positions(df):
     """
@@ -624,13 +624,13 @@ def main():
     # Debug mode toggle
     # debug_mode = st.sidebar.checkbox("🐛 Debug Mode", value=False)
     
-    if debug_mode:
-        st.sidebar.subheader("🔍 Debug Info")
-        st.sidebar.write(f"Current working directory: {Path.cwd()}")
-        st.sidebar.write(f"Data directory exists: {Path('data').exists()}")
-        if Path('data').exists():
-            csv_files = list(Path('data').glob("*.csv"))
-            st.sidebar.write(f"CSV files found: {[f.name for f in csv_files]}")
+    # if debug_mode:
+    #     st.sidebar.subheader("🔍 Debug Info")
+    #     st.sidebar.write(f"Current working directory: {Path.cwd()}")
+    #     st.sidebar.write(f"Data directory exists: {Path('data').exists()}")
+    #     if Path('data').exists():
+    #         csv_files = list(Path('data').glob("*.csv"))
+    #         st.sidebar.write(f"CSV files found: {[f.name for f in csv_files]}")
     
     # Load data
     master_df, adp_df = load_all_data()
