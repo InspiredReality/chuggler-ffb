@@ -1,0 +1,641 @@
+year,round,pick,team_name,player_name,position,season_points
+2021,1,1,King Of The North,Patrick Mahomes,QB,375.0
+2021,1,2,Walk wit a Waddle,Christian McCaffrey,RB,127.5
+2021,1,3,Front Gate Dragon,Alvin Kamara,RB,216.5
+2021,1,4,Homer Romer Angel Baby Patrick,Dalvin Cook,RB,197.1
+2021,1,5,Maurice Clarett’s Potential,Davante Adams,WR,332.8
+2021,1,6,Welitapay-anudadae,Derrick Henry,RB,195.27
+2021,1,7,Big Daddy D,Josh Allen,QB,418.95
+2021,1,8,Taysoms Hills Ep 2,Nick Chubb,RB,208.3
+2021,1,9,OBtoshi Nakamoto,Lamar Jackson,QB,252.77
+2021,1,10,Michael's Neat Team,Kyler Murray,QB,305.73
+2021,2,11,Michael's Neat Team,Ezekiel Elliott,RB,242.03
+2021,2,12,OBtoshi Nakamoto,Travis Kelce,TE,249.4
+2021,2,13,Taysoms Hills Ep 2,Russell Wilson,QB,243.64
+2021,2,14,Big Daddy D,Aaron Jones Sr.,RB,229.0
+2021,2,15,Welitapay-anudadae,Dak Prescott,QB,325.05
+2021,2,16,Maurice Clarett’s Potential,Jonathan Taylor,RB,360.6
+2021,2,17,Homer Romer Angel Baby Patrick,Tyreek Hill,WR,295.3
+2021,2,18,Front Gate Dragon,Austin Ekeler,RB,314.9
+2021,2,19,Walk wit a Waddle,Aaron Rodgers,QB,362.55
+2021,2,20,King Of The North,Tom Brady,QB,396.42
+2021,3,21,King Of The North,Stefon Diggs,WR,262.4
+2021,3,22,Walk wit a Waddle,Justin Herbert,QB,392.48
+2021,3,23,Front Gate Dragon,DeAndre Hopkins,WR,147.2
+2021,3,24,Homer Romer Angel Baby Patrick,Saquon Barkley,RB,140.7
+2021,3,25,Maurice Clarett’s Potential,Matthew Stafford,QB,357.24
+2021,3,26,Welitapay-anudadae,DK Metcalf,WR,233.5
+2021,3,27,Big Daddy D,Calvin Ridley,WR,71.1
+2021,3,28,Taysoms Hills Ep 2,Darren Waller,TE,129.3
+2021,3,29,OBtoshi Nakamoto,Najee Harris,RB,291.2
+2021,3,30,Michael's Neat Team,Jalen Hurts,QB,322.99
+2021,4,31,Michael's Neat Team,Allen Robinson,WR,80.8
+2021,4,32,OBtoshi Nakamoto,Joe Mixon,RB,287.9
+2021,4,33,Taysoms Hills Ep 2,Tyler Lockett,WR,214.4
+2021,4,34,Big Daddy D,Antonio Gibson,RB,207.0
+2021,4,35,Welitapay-anudadae,Chris Godwin,WR,242.4
+2021,4,36,Maurice Clarett’s Potential,Terry McLaurin,WR,200.2
+2021,4,37,Homer Romer Angel Baby Patrick,Ryan Tannehill,QB,252.12
+2021,4,38,Front Gate Dragon,Keenan Allen,WR,246.6
+2021,4,39,Walk wit a Waddle,Clyde Edwards-Helaire,RB,117.6
+2021,4,40,King Of The North,David Montgomery,RB,185.10000000000002
+2021,5,41,King Of The North,Kareem Hunt,RB,110.0
+2021,5,42,Walk wit a Waddle,Justin Jefferson,WR,308.07
+2021,5,43,Front Gate Dragon,George Kittle,TE,192.0
+2021,5,44,Homer Romer Angel Baby Patrick,A.J. Brown,WR,164.1
+2021,5,45,Maurice Clarett’s Potential,Cooper Kupp,WR,412.9
+2021,5,46,Welitapay-anudadae,Joe Burrow,QB,351.49
+2021,5,47,Big Daddy D,Chris Carson,RB,48.1
+2021,5,48,Taysoms Hills Ep 2,James Robinson,RB,173.9
+2021,5,49,OBtoshi Nakamoto,Baker Mayfield,QB,194.84
+2021,5,50,Michael's Neat Team,Mike Evans,WR,235.6
+2021,6,51,Michael's Neat Team,Unknown Player,Unknown,0.0
+2021,6,52,OBtoshi Nakamoto,Miles Sanders,RB,117.2
+2021,6,53,Taysoms Hills Ep 2,CeeDee Lamb,WR,226.3
+2021,6,54,Big Daddy D,Mark Andrews,TE,284.6
+2021,6,55,Welitapay-anudadae,D'Andre Swift,RB,194.29999999999998
+2021,6,56,Maurice Clarett’s Potential,Josh Jacobs,RB,203.6
+2021,6,57,Homer Romer Angel Baby Patrick,Trevor Lawrence,QB,177.62
+2021,6,58,Front Gate Dragon,Diontae Johnson,WR,262.3
+2021,6,59,Walk wit a Waddle,Robert Woods,WR,137.2
+2021,6,60,King Of The North,Kyle Pitts Sr.,TE,173.8
+2021,7,61,King Of The North,Odell Beckham Jr.,WR,125.3
+2021,7,62,Walk wit a Waddle,Javonte Williams,RB,196.5
+2021,7,63,Front Gate Dragon,Ben Roethlisberger,QB,225.43
+2021,7,64,Homer Romer Angel Baby Patrick,Darrell Henderson Jr.,RB,163.4
+2021,7,65,Maurice Clarett’s Potential,Kirk Cousins,QB,311.96
+2021,7,66,Welitapay-anudadae,Amari Cooper,WR,189.6
+2021,7,67,Big Daddy D,Matt Ryan,QB,225.07
+2021,7,68,Taysoms Hills Ep 2,Julio Jones,WR,63.6
+2021,7,69,OBtoshi Nakamoto,Adam Thielen,WR,199.8
+2021,7,70,Michael's Neat Team,Tee Higgins,WR,219.1
+2021,8,71,Michael's Neat Team,Mike Davis,RB,136.4
+2021,8,72,OBtoshi Nakamoto,DJ Moore,WR,220.5
+2021,8,73,Taysoms Hills Ep 2,Derek Carr,QB,252.85
+2021,8,74,Big Daddy D,T.J. Hockenson,TE,145.3
+2021,8,75,Welitapay-anudadae,Myles Gaskin,RB,169.6
+2021,8,76,Maurice Clarett’s Potential,Brandon Aiyuk,WR,153.6
+2021,8,77,Homer Romer Angel Baby Patrick,Chase Claypool,WR,148.6
+2021,8,78,Front Gate Dragon,Tua Tagovailoa,QB,181.79
+2021,8,79,Walk wit a Waddle,Ja'Marr Chase,WR,300.0
+2021,8,80,King Of The North,Damien Harris,RB,192.8
+2021,9,81,King Of The North,Jerry Jeudy,WR,80.0
+2021,9,82,Walk wit a Waddle,JuJu Smith-Schuster,WR,34.8
+2021,9,83,Front Gate Dragon,Justin Fields,QB,128.32999999999998
+2021,9,84,Homer Romer Angel Baby Patrick,Logan Thomas,TE,53.6
+2021,9,85,Maurice Clarett’s Potential,Chase Edmonds,RB,143.3
+2021,9,86,Welitapay-anudadae,Devin Singletary,RB,172.6
+2021,9,87,Big Daddy D,Robbie Chosen,WR,120.5
+2021,9,88,Taysoms Hills Ep 2,Jameis Winston,QB,137.6
+2021,9,89,OBtoshi Nakamoto,Corey Davis,WR,105.2
+2021,9,90,Michael's Neat Team,Robert Tonyan,TE,50.4
+2021,10,91,Michael's Neat Team,Trey Sermon,RB,28.3
+2021,10,92,OBtoshi Nakamoto,Raheem Mostert,RB,2.0
+2021,10,93,Taysoms Hills Ep 2,Jarvis Landry,WR,113.5
+2021,10,94,Big Daddy D,Michael Thomas,WR,0.0
+2021,10,95,Welitapay-anudadae,Michael Pittman Jr.,WR,218.2
+2021,10,96,Maurice Clarett’s Potential,Melvin Gordon III,RB,178.5
+2021,10,97,Homer Romer Angel Baby Patrick,Ryan Fitzpatrick,QB,0.63
+2021,10,98,Front Gate Dragon,Tyler Boyd,WR,183.53
+2021,10,99,Walk wit a Waddle,Ronald Jones,RB,79.2
+2021,10,100,King Of The North,Giovani Bernard,RB,59.1
+2021,11,101,King Of The North,Mecole Hardman,WR,121.60000000000001
+2021,11,102,Walk wit a Waddle,Jaylen Waddle,WR,232.1
+2021,11,103,Front Gate Dragon,Trey Lance,QB,70.89999999999999
+2021,11,104,Homer Romer Angel Baby Patrick,James Conner,RB,230.4
+2021,11,105,Maurice Clarett’s Potential,Tyrell Williams,WR,3.4
+2021,11,106,Welitapay-anudadae,Daniel Jones,QB,171.35
+2021,11,107,Big Daddy D,Carson Wentz,QB,276.4
+2021,11,108,Taysoms Hills Ep 2,Deshaun Watson,QB,0.0
+2021,11,109,OBtoshi Nakamoto,Antonio Brown,WR,121.1
+2021,11,110,Michael's Neat Team,Kenny Golladay,WR,83.9
+2021,12,111,Michael's Neat Team,Courtland Sutton,WR,147.29999999999998
+2021,12,112,OBtoshi Nakamoto,Nyheim Miller-Hines,RB,108.7
+2021,12,113,Taysoms Hills Ep 2,A.J. Green,WR,150.5
+2021,12,114,Big Daddy D,Los Angeles,DEF,114.0
+2021,12,115,Welitapay-anudadae,Tyler Higbee,TE,123.5
+2021,12,116,Maurice Clarett’s Potential,Noah Fant,TE,156.4
+2021,12,117,Homer Romer Angel Baby Patrick,Deebo Samuel,WR,310.0
+2021,12,118,Front Gate Dragon,Washington,DEF,78.0
+2021,12,119,Walk wit a Waddle,Rob Gronkowski,TE,150.5
+2021,12,120,King Of The North,Sam Darnold,QB,141.22
+2021,13,121,King Of The North,Tampa Bay,DEF,134.0
+2021,13,122,Walk wit a Waddle,Jared Goff,QB,190.94
+2021,13,123,Front Gate Dragon,Justin Tucker,K,154.0
+2021,13,124,Homer Romer Angel Baby Patrick,Harrison Butker,K,130.0
+2021,13,125,Maurice Clarett’s Potential,Jimmy Garoppolo,QB,229.48000000000002
+2021,13,126,Welitapay-anudadae,Brandin Cooks,WR,226.2
+2021,13,127,Big Daddy D,Hollywood Brown,WR,220.6
+2021,13,128,Taysoms Hills Ep 2,Mark Ingram II,RB,108.60000000000001
+2021,13,129,OBtoshi Nakamoto,Zach Wilson,QB,142.99
+2021,13,130,Michael's Neat Team,Pittsburgh,DEF,98.0
+2021,14,131,Michael's Neat Team,Younghoe Koo,K,114.0
+2021,14,132,OBtoshi Nakamoto,Rodrigo Blankenship,K,45.0
+2021,14,133,Taysoms Hills Ep 2,Cleveland,DEF,96.0
+2021,14,134,Big Daddy D,Tyler Bass,K,133.0
+2021,14,135,Welitapay-anudadae,Ryan Succop,K,126.0
+2021,14,136,Maurice Clarett’s Potential,Unknown Player,Unknown,0.0
+2021,14,137,Homer Romer Angel Baby Patrick,San Francisco,DEF,109.0
+2021,14,138,Front Gate Dragon,DeVonta Smith,WR,178.5
+2021,14,139,Walk wit a Waddle,Mike Williams,WR,219.7
+2021,14,140,King Of The North,Jason Sanders,K,105.0
+2021,15,141,King Of The North,Dallas Goedert,TE,165.0
+2021,15,142,Walk wit a Waddle,Indianapolis,DEF,137.0
+2021,15,143,Front Gate Dragon,Sony Michel,RB,140.4
+2021,15,144,Homer Romer Angel Baby Patrick,Mike Gesicki,TE,160.8
+2021,15,145,Maurice Clarett’s Potential,Unknown Player,Unknown,0.0
+2021,15,146,Welitapay-anudadae,Baltimore,DEF,81.0
+2021,15,147,Big Daddy D,A.J. Dillon,RB,177.9
+2021,15,148,Taysoms Hills Ep 2,Greg Zuerlein,K,130.0
+2021,15,149,OBtoshi Nakamoto,Kansas City,DEF,122.0
+2021,15,150,Michael's Neat Team,Gerald Everett,TE,114.8
+2021,16,151,Michael's Neat Team,Leonard Fournette,RB,255.6
+2021,16,152,OBtoshi Nakamoto,Henry Ruggs III,WR,84.5
+2021,16,153,Taysoms Hills Ep 2,Curtis Samuel,WR,9.8
+2021,16,154,Big Daddy D,Jakobi Meyers,WR,177.0
+2021,16,155,Welitapay-anudadae,Mac Jones,QB,232.49
+2021,16,156,Maurice Clarett’s Potential,Tyrod Taylor,QB,85.31
+2021,16,157,Homer Romer Angel Baby Patrick,Denver,DEF,117.0
+2021,16,158,Front Gate Dragon,Michael Carter,RB,152.5
+2021,16,159,Walk wit a Waddle,Matt Gay,K,152.0
+2021,16,160,King Of The North,Teddy Bridgewater,QB,218.33
+2022,1,1,Sportins Squad,Jonathan Taylor,RB,146.4
+2022,1,2,OBtoshi Nakamoto,Josh Allen,QB,397.47
+2022,1,3,The Deshaun Rub Down,Justin Herbert,QB,263.78
+2022,1,4,Welitapay-anudadae,Christian McCaffrey,RB,341.12
+2022,1,5,Nuk Nuk… Who’s There?,Patrick Mahomes,QB,431.94
+2022,1,6,Lord of Lakengren,Najee Harris,RB,209.42000000000002
+2022,1,7,Bridge under Teddy Water,Cooper Kupp,WR,201.4
+2022,1,8,Michael's Neat Team,Ja'Marr Chase,WR,219.8
+2022,1,9,Front Gate Dragon,Lamar Jackson,QB,247.66
+2022,1,10,King Of The North,Joe Burrow,QB,364.5
+2022,2,11,King Of The North,Austin Ekeler,RB,363.7
+2022,2,12,Front Gate Dragon,Kyler Murray,QB,204.84
+2022,2,13,Michael's Neat Team,Jalen Hurts,QB,378.86
+2022,2,14,Bridge under Teddy Water,Justin Jefferson,WR,360.52
+2022,2,15,Lord of Lakengren,Tom Brady,QB,266.2
+2022,2,16,Nuk Nuk… Who’s There?,Joe Mixon,RB,221.70000000000002
+2022,2,17,Welitapay-anudadae,Davante Adams,WR,323.2
+2022,2,18,The Deshaun Rub Down,Dalvin Cook,RB,235.1
+2022,2,19,OBtoshi Nakamoto,Nick Chubb,RB,258.2
+2022,2,20,Sportins Squad,Aaron Rodgers,QB,243.1
+2022,3,21,Sportins Squad,Alvin Kamara,RB,199.7
+2022,3,22,OBtoshi Nakamoto,Dak Prescott,QB,206.56
+2022,3,23,The Deshaun Rub Down,Travis Kelce,TE,306.5
+2022,3,24,Welitapay-anudadae,Russell Wilson,QB,196.23
+2022,3,25,Nuk Nuk… Who’s There?,Matthew Stafford,QB,107.50999999999999
+2022,3,26,Lord of Lakengren,Javonte Williams,RB,42.0
+2022,3,27,Bridge under Teddy Water,Deebo Samuel,WR,164.0
+2022,3,28,Michael's Neat Team,D'Andre Swift,RB,175.5
+2022,3,29,Front Gate Dragon,Saquon Barkley,RB,284.0
+2022,3,30,King Of The North,Aaron Jones Sr.,RB,240.8
+2022,4,31,King Of The North,Stefon Diggs,WR,293.2
+2022,4,32,Front Gate Dragon,Mark Andrews,TE,190.5
+2022,4,33,Michael's Neat Team,CeeDee Lamb,WR,285.4
+2022,4,34,Bridge under Teddy Water,Leonard Fournette,RB,224.70000000000002
+2022,4,35,Lord of Lakengren,Michael Pittman Jr.,WR,204.5
+2022,4,36,Nuk Nuk… Who’s There?,Tyreek Hill,WR,342.9
+2022,4,37,Welitapay-anudadae,Derek Carr,QB,231.86
+2022,4,38,The Deshaun Rub Down,Trey Lance,QB,10.52
+2022,4,39,OBtoshi Nakamoto,Keenan Allen,WR,133.8
+2022,4,40,Sportins Squad,Darren Waller,TE,79.3
+2022,5,41,Sportins Squad,James Conner,RB,200.2
+2022,5,42,OBtoshi Nakamoto,George Kittle,TE,181.6
+2022,5,43,The Deshaun Rub Down,Mike Evans,WR,225.4
+2022,5,44,Welitapay-anudadae,A.J. Brown,WR,286.1
+2022,5,45,Nuk Nuk… Who’s There?,Ezekiel Elliott,RB,184.8
+2022,5,46,Lord of Lakengren,JuJu Smith-Schuster,WR,179.8
+2022,5,47,Bridge under Teddy Water,Kyle Pitts Sr.,TE,75.6
+2022,5,48,Michael's Neat Team,Josh Jacobs,RB,321.3
+2022,5,49,Front Gate Dragon,Travis Etienne Jr.,RB,199.70000000000002
+2022,5,50,King Of The North,Kirk Cousins,QB,291.36
+2022,6,51,King Of The North,Tee Higgins,WR,219.2
+2022,6,52,Front Gate Dragon,Courtland Sutton,WR,147.1
+2022,6,53,Michael's Neat Team,T.J. Hockenson,TE,212.8
+2022,6,54,Bridge under Teddy Water,Cam Akers,RB,125.5
+2022,6,55,Lord of Lakengren,Ryan Tannehill,QB,161.88
+2022,6,56,Nuk Nuk… Who’s There?,Mike Williams,WR,169.3
+2022,6,57,Welitapay-anudadae,DK Metcalf,WR,219.8
+2022,6,58,The Deshaun Rub Down,DJ Moore,WR,197.10000000000002
+2022,6,59,OBtoshi Nakamoto,J.K. Dobbins,RB,81.2
+2022,6,60,Sportins Squad,Jerry Jeudy,WR,179.9
+2022,7,61,Sportins Squad,Terry McLaurin,WR,212.6
+2022,7,62,OBtoshi Nakamoto,Breece Hall,RB,115.10000000000001
+2022,7,63,The Deshaun Rub Down,Chase Edmonds,RB,69.7
+2022,7,64,Welitapay-anudadae,Clyde Edwards-Helaire,RB,98.3
+2022,7,65,Nuk Nuk… Who’s There?,David Montgomery,RB,175.6
+2022,7,66,Lord of Lakengren,Zach Wilson,QB,94.04
+2022,7,67,Bridge under Teddy Water,Diontae Johnson,WR,172.9
+2022,7,68,Michael's Neat Team,Trevor Lawrence,QB,294.43
+2022,7,69,Front Gate Dragon,Amon-Ra St. Brown,WR,256.7
+2022,7,70,King Of The North,Allen Robinson,WR,84.9
+2022,8,71,King Of The North,Elijah Mitchell,RB,26.1
+2022,8,72,Front Gate Dragon,Hollywood Brown,WR,154.3
+2022,8,73,Michael's Neat Team,A.J. Dillon,RB,164.3
+2022,8,74,Bridge under Teddy Water,Tua Tagovailoa,QB,245.44
+2022,8,75,Lord of Lakengren,Hunter Renfrow,WR,59.7
+2022,8,76,Nuk Nuk… Who’s There?,Michael Thomas,WR,51.1
+2022,8,77,Welitapay-anudadae,Gabe Davis,WR,164.7
+2022,8,78,The Deshaun Rub Down,Elijah Moore,WR,86.0
+2022,8,79,OBtoshi Nakamoto,Jaylen Waddle,WR,248.9
+2022,8,80,Sportins Squad,Justin Fields,QB,307.56
+2022,9,81,Sportins Squad,Allen Lazard,WR,160.70000000000002
+2022,9,82,OBtoshi Nakamoto,Brandin Cooks,WR,124.0
+2022,9,83,The Deshaun Rub Down,Jameis Winston,QB,43.34
+2022,9,84,Welitapay-anudadae,Dalton Schultz,TE,135.4
+2022,9,85,Nuk Nuk… Who’s There?,DeAndre Hopkins,WR,151.7
+2022,9,86,Lord of Lakengren,Darnell Mooney,WR,101.5
+2022,9,87,Bridge under Teddy Water,Rondale Moore,WR,87.89999999999999
+2022,9,88,Michael's Neat Team,Chris Godwin,WR,213.3
+2022,9,89,Front Gate Dragon,Rashod Bateman,WR,53.5
+2022,9,90,King Of The North,Dallas Goedert,TE,130.6
+2022,10,91,King Of The North,Adam Thielen,WR,170.79999999999998
+2022,10,92,Front Gate Dragon,Kareem Hunt,RB,121.0
+2022,10,93,Michael's Neat Team,Dameon Pierce,RB,166.4
+2022,10,94,Bridge under Teddy Water,Matt Ryan,QB,152.71
+2022,10,95,Lord of Lakengren,Jared Goff,QB,290.72
+2022,10,96,Nuk Nuk… Who’s There?,Tony Pollard,RB,246.9
+2022,10,97,Welitapay-anudadae,Miles Sanders,RB,213.4
+2022,10,98,The Deshaun Rub Down,Antonio Gibson,RB,165.9
+2022,10,99,OBtoshi Nakamoto,Darrell Henderson Jr.,RB,73.5
+2022,10,100,Sportins Squad,Cordarrelle Patterson,RB,144.8
+2022,11,101,Sportins Squad,Rashaad Penny,RB,52.2
+2022,11,102,OBtoshi Nakamoto,Amari Cooper,WR,238.9
+2022,11,103,The Deshaun Rub Down,Deshaun Watson,QB,69.25999999999999
+2022,11,104,Welitapay-anudadae,Zach Ertz,TE,115.60000000000001
+2022,11,105,Nuk Nuk… Who’s There?,Devin Singletary,RB,175.7
+2022,11,106,Lord of Lakengren,Albert Okwuegbunam,TE,25.5
+2022,11,107,Bridge under Teddy Water,Marquez Valdes-Scantling,WR,116.7
+2022,11,108,Michael's Neat Team,Mac Jones,QB,148.32
+2022,11,109,Front Gate Dragon,Christian Kirk,WR,220.0
+2022,11,110,King Of The North,Baker Mayfield,QB,115.78
+2022,12,111,King Of The North,Drake London,WR,160.6
+2022,12,112,Front Gate Dragon,Rhamondre Stevenson,RB,235.9
+2022,12,113,Michael's Neat Team,Daniel Carlson,K,153.0
+2022,12,114,Bridge under Teddy Water,Nyheim Miller-Hines,RB,69.4
+2022,12,115,Lord of Lakengren,Rachaad White,RB,137.6
+2022,12,116,Nuk Nuk… Who’s There?,Brandon Aiyuk,WR,217.9
+2022,12,117,Welitapay-anudadae,Melvin Gordon III,RB,87.1
+2022,12,118,The Deshaun Rub Down,DeVonta Smith,WR,240.9
+2022,12,119,OBtoshi Nakamoto,Chase Claypool,WR,102.13
+2022,12,120,Sportins Squad,Carson Wentz,QB,117.25
+2022,13,121,Sportins Squad,Tyler Lockett,WR,221.9
+2022,13,122,OBtoshi Nakamoto,Los Angeles,DEF,96.0
+2022,13,123,The Deshaun Rub Down,Justin Tucker,K,152.0
+2022,13,124,Welitapay-anudadae,Unknown Player,Unknown,0.0
+2022,13,125,Nuk Nuk… Who’s There?,Dawson Knox,TE,126.4
+2022,13,126,Lord of Lakengren,Tampa Bay,DEF,101.0
+2022,13,127,Bridge under Teddy Water,Evan McPherson,K,122.0
+2022,13,128,Michael's Neat Team,Buffalo,DEF,129.0
+2022,13,129,Front Gate Dragon,James Cook,RB,98.6
+2022,13,130,King Of The North,Pat Freiermuth,TE,148.2
+2022,14,131,King Of The North,Harrison Butker,K,94.0
+2022,14,132,Front Gate Dragon,Brian Robinson Jr.,RB,112.7
+2022,14,133,Michael's Neat Team,Tyler Boyd,WR,156.79
+2022,14,134,Bridge under Teddy Water,Indianapolis,DEF,103.0
+2022,14,135,Lord of Lakengren,DeVante Parker,WR,77.0
+2022,14,136,Nuk Nuk… Who’s There?,James Robinson,RB,88.6
+2022,14,137,Welitapay-anudadae,Isaiah McKenzie,WR,115.9
+2022,14,138,The Deshaun Rub Down,Alexander Mattison,RB,69.4
+2022,14,139,OBtoshi Nakamoto,Chuba Hubbard,RB,80.8
+2022,14,140,Sportins Squad,Robert Woods,WR,107.7
+2022,15,141,Sportins Squad,Matt Gay,K,122.0
+2022,15,142,OBtoshi Nakamoto,Daniel Jones,QB,286.95
+2022,15,143,The Deshaun Rub Down,San Francisco,DEF,149.0
+2022,15,144,Welitapay-anudadae,Kadarius Toney,WR,44.9
+2022,15,145,Nuk Nuk… Who’s There?,New England,DEF,182.0
+2022,15,146,Lord of Lakengren,Brandon McManus,K,128.0
+2022,15,147,Bridge under Teddy Water,Unknown Player,Unknown,0.0
+2022,15,148,Michael's Neat Team,Michael Carter,RB,123.5
+2022,15,149,Front Gate Dragon,Green Bay,DEF,115.0
+2022,15,150,King Of The North,Chris Olave,WR,183.20000000000002
+2022,16,151,King Of The North,Cleveland,DEF,108.0
+2022,16,152,Front Gate Dragon,Tyler Bass,K,138.0
+2022,16,153,Michael's Neat Team,Damien Harris,RB,84.7
+2022,16,154,Bridge under Teddy Water,JaMycal Hasty,RB,69.5
+2022,16,155,Lord of Lakengren,Derrick Henry,RB,290.92
+2022,16,156,Nuk Nuk… Who’s There?,Dustin Hopkins,K,40.0
+2022,16,157,Welitapay-anudadae,New Orleans,DEF,102.0
+2022,16,158,The Deshaun Rub Down,Garrett Wilson,WR,197.79999999999998
+2022,16,159,OBtoshi Nakamoto,Matt Prater,K,98.0
+2022,16,160,Sportins Squad,Unknown Player,Unknown,0.0
+2023,1,1,Michael's Neat Team,Patrick Mahomes,QB,292.39
+2023,1,2,King Of The North,Jalen Hurts,QB,364.19
+2023,1,3,The Deshaun Rub Down,Christian McCaffrey,RB,391.3
+2023,1,4,OBtoshi Nakamoto,Josh Allen,QB,384.11
+2023,1,5,Broken Football,Travis Kelce,TE,219.4
+2023,1,6,Front Gate Dragon,Joe Burrow,QB,154.07
+2023,1,7,Sportins Squad,Lamar Jackson,QB,342.44
+2023,1,8,🍆🐒💨,Justin Jefferson,WR,166.2
+2023,1,9,Lord of Lakengren,Justin Herbert,QB,242.82
+2023,1,10,Chili Cheese Burritos,Ja'Marr Chase,WR,256.89
+2023,2,11,Chili Cheese Burritos,Austin Ekeler,RB,173.5
+2023,2,12,Lord of Lakengren,Bijan Robinson,RB,220.2
+2023,2,13,🍆🐒💨,Tyreek Hill,WR,355.2
+2023,2,14,Sportins Squad,Nick Chubb,RB,23.1
+2023,2,15,Front Gate Dragon,Cooper Kupp,WR,164.4
+2023,2,16,Broken Football,Derrick Henry,RB,229.22000000000003
+2023,2,17,OBtoshi Nakamoto,Saquon Barkley,RB,199.5
+2023,2,18,The Deshaun Rub Down,Garrett Wilson,WR,207.8
+2023,2,19,King Of The North,Stefon Diggs,WR,258.1
+2023,2,20,Michael's Neat Team,CeeDee Lamb,WR,367.70000000000005
+2023,3,21,Michael's Neat Team,Josh Jacobs,RB,181.1
+2023,3,22,King Of The North,DeVonta Smith,WR,227.6
+2023,3,23,The Deshaun Rub Down,Trevor Lawrence,QB,246.98000000000002
+2023,3,24,OBtoshi Nakamoto,Davante Adams,WR,249.8
+2023,3,25,Broken Football,Tua Tagovailoa,QB,274.23
+2023,3,26,Front Gate Dragon,Joe Mixon,RB,242.3
+2023,3,27,Sportins Squad,DJ Moore,WR,276.1
+2023,3,28,🍆🐒💨,Mark Andrews,TE,135.4
+2023,3,29,Lord of Lakengren,Dak Prescott,QB,339.31
+2023,3,30,Chili Cheese Burritos,Daniel Jones,QB,51.870000000000005
+2023,4,31,Chili Cheese Burritos,Travis Etienne Jr.,RB,268.7
+2023,4,32,Lord of Lakengren,Jahmyr Gibbs,RB,233.1
+2023,4,33,🍆🐒💨,Najee Harris,RB,171.20000000000002
+2023,4,34,Sportins Squad,DK Metcalf,WR,223.4
+2023,4,35,Front Gate Dragon,Chris Olave,WR,216.7
+2023,4,36,Broken Football,A.J. Brown,WR,289.7
+2023,4,37,OBtoshi Nakamoto,Aaron Rodgers,QB,0.0
+2023,4,38,The Deshaun Rub Down,Jonathan Taylor,RB,128.8
+2023,4,39,King Of The North,Kirk Cousins,QB,162.43
+2023,4,40,Michael's Neat Team,Geno Smith,QB,208.55
+2023,5,41,Michael's Neat Team,Tee Higgins,WR,137.6
+2023,5,42,King Of The North,Alexander Mattison,RB,129.3
+2023,5,43,The Deshaun Rub Down,Calvin Ridley,WR,207.3
+2023,5,44,OBtoshi Nakamoto,Amari Cooper,WR,227.0
+2023,5,45,Broken Football,Anthony Richardson Sr.,QB,72.91
+2023,5,46,Front Gate Dragon,Rhamondre Stevenson,RB,145.7
+2023,5,47,Sportins Squad,James Conner,RB,171.1
+2023,5,48,🍆🐒💨,Russell Wilson,QB,278.2
+2023,5,49,Lord of Lakengren,T.J. Hockenson,TE,219.0
+2023,5,50,Chili Cheese Burritos,Keenan Allen,WR,280.37
+2023,6,51,Chili Cheese Burritos,George Kittle,TE,203.20000000000002
+2023,6,52,Lord of Lakengren,DeAndre Hopkins,WR,206.0
+2023,6,53,🍆🐒💨,Drake London,WR,166.06
+2023,6,54,Sportins Squad,Chris Godwin,WR,197.7
+2023,6,55,Front Gate Dragon,Amon-Ra St. Brown,WR,303.5
+2023,6,56,Broken Football,Breece Hall,RB,261.5
+2023,6,57,OBtoshi Nakamoto,Darren Waller,TE,103.7
+2023,6,58,The Deshaun Rub Down,Christian Watson,WR,101.3
+2023,6,59,King Of The North,Aaron Jones Sr.,RB,115.80000000000001
+2023,6,60,Michael's Neat Team,Dallas Goedert,TE,134.9
+2023,7,61,Michael's Neat Team,Isiah Pacheco,RB,213.9
+2023,7,62,King Of The North,Dameon Pierce,RB,82.7
+2023,7,63,The Deshaun Rub Down,Miles Sanders,RB,85.8
+2023,7,64,OBtoshi Nakamoto,Jaylen Waddle,WR,198.60000000000002
+2023,7,65,Broken Football,David Montgomery,RB,197.2
+2023,7,66,Front Gate Dragon,Jared Goff,QB,281.75
+2023,7,67,Sportins Squad,Justin Fields,QB,229.42
+2023,7,68,🍆🐒💨,Kenneth Walker III,RB,190.3
+2023,7,69,Lord of Lakengren,Terry McLaurin,WR,197.60000000000002
+2023,7,70,Chili Cheese Burritos,Kenny Pickett,QB,101.5
+2023,8,71,Chili Cheese Burritos,Christian Kirk,WR,150.27
+2023,8,72,Lord of Lakengren,Tyler Lockett,WR,185.3
+2023,8,73,🍆🐒💨,Kyler Murray,QB,131.21
+2023,8,74,Sportins Squad,J.K. Dobbins,RB,11.7
+2023,8,75,Front Gate Dragon,James Cook,RB,224.5
+2023,8,76,Broken Football,D'Andre Swift,RB,199.3
+2023,8,77,OBtoshi Nakamoto,Khalil Herbert,RB,106.4
+2023,8,78,The Deshaun Rub Down,Deebo Samuel,WR,238.5
+2023,8,79,King Of The North,Javonte Williams,RB,158.7
+2023,8,80,Michael's Neat Team,Cam Akers,RB,46.699999999999996
+2023,9,81,Michael's Neat Team,Diontae Johnson,WR,133.8
+2023,9,82,King Of The North,Jaxon Smith-Njigba,WR,145.4
+2023,9,83,The Deshaun Rub Down,Matthew Stafford,QB,251.45000000000002
+2023,9,84,OBtoshi Nakamoto,Alvin Kamara,RB,233.0
+2023,9,85,Broken Football,Hollywood Brown,WR,134.70000000000002
+2023,9,86,Front Gate Dragon,Kyle Pitts Sr.,TE,132.6
+2023,9,87,Sportins Squad,Evan Engram,TE,206.4
+2023,9,88,🍆🐒💨,Tony Pollard,RB,206.0
+2023,9,89,Lord of Lakengren,Quentin Johnston,WR,89.7
+2023,9,90,Chili Cheese Burritos,George Pickens,WR,208.5
+2023,10,91,Chili Cheese Burritos,A.J. Dillon,RB,117.6
+2023,10,92,Lord of Lakengren,Zay Flowers,WR,206.4
+2023,10,93,🍆🐒💨,Derek Carr,QB,219.82
+2023,10,94,Sportins Squad,Jordan Love,QB,322.09000000000003
+2023,10,95,Front Gate Dragon,Brock Purdy,QB,314.8
+2023,10,96,Broken Football,Mike Evans,WR,277.3
+2023,10,97,OBtoshi Nakamoto,Jahan Dotson,WR,121.1
+2023,10,98,The Deshaun Rub Down,Deshaun Watson,QB,89.65
+2023,10,99,King Of The North,Jimmy Garoppolo,QB,66.05
+2023,10,100,Michael's Neat Team,Justin Tucker,K,156.0
+2023,11,101,Michael's Neat Team,Desmond Ridder,QB,156.05
+2023,11,102,King Of The North,David Njoku,TE,201.2
+2023,11,103,The Deshaun Rub Down,Jerick McKinnon,RB,86.32
+2023,11,104,OBtoshi Nakamoto,C.J. Stroud,QB,259.02
+2023,11,105,Broken Football,Bryce Young,QB,146.39
+2023,11,106,Front Gate Dragon,Dalton Kincaid,TE,134.9
+2023,11,107,Sportins Squad,Jerry Jeudy,WR,124.9
+2023,11,108,🍆🐒💨,Jordan Addison,WR,205.6
+2023,11,109,Lord of Lakengren,Sam Howell,QB,252.19
+2023,11,110,Chili Cheese Burritos,Michael Thomas,WR,89.8
+2023,12,111,Chili Cheese Burritos,Dalvin Cook,RB,40.2
+2023,12,112,Lord of Lakengren,Rachaad White,RB,254.6
+2023,12,113,🍆🐒💨,Michael Pittman Jr.,WR,242.8
+2023,12,114,Sportins Squad,Antonio Gibson,RB,120.8
+2023,12,115,Front Gate Dragon,Skyy Moore,WR,53.7
+2023,12,116,Broken Football,Jayden Reed,WR,202.0
+2023,12,117,OBtoshi Nakamoto,Pat Freiermuth,TE,72.7
+2023,12,118,The Deshaun Rub Down,Elijah Moore,WR,132.1
+2023,12,119,King Of The North,Brandon Aiyuk,WR,243.7
+2023,12,120,Michael's Neat Team,Romeo Doubs,WR,174.4
+2023,13,121,Michael's Neat Team,Brian Robinson Jr.,RB,187.6
+2023,13,122,King Of The North,Gabe Davis,WR,161.4
+2023,13,123,The Deshaun Rub Down,Dalton Schultz,TE,141.3
+2023,13,124,OBtoshi Nakamoto,JuJu Smith-Schuster,WR,61.0
+2023,13,125,Broken Football,Ryan Tannehill,QB,57.14
+2023,13,126,Front Gate Dragon,Samaje Perine,RB,115.3
+2023,13,127,Sportins Squad,Odell Beckham Jr.,WR,107.5
+2023,13,128,🍆🐒💨,Zach Charbonnet,RB,98.1
+2023,13,129,Lord of Lakengren,Mike Williams,WR,50.2
+2023,13,130,Chili Cheese Burritos,Brandin Cooks,WR,157.0
+2023,14,131,Chili Cheese Burritos,Ezekiel Elliott,RB,161.4
+2023,14,132,Lord of Lakengren,Tank Bigsby,RB,21.2
+2023,14,133,🍆🐒💨,Dallas,DEF,162.0
+2023,14,134,Sportins Squad,Treylon Burks,WR,39.9
+2023,14,135,Front Gate Dragon,Jameson Williams,WR,80.3
+2023,14,136,Broken Football,De'Von Achane,RB,177.6
+2023,14,137,OBtoshi Nakamoto,Damien Harris,RB,19.0
+2023,14,138,The Deshaun Rub Down,Cole Kmet,TE,174.0
+2023,14,139,King Of The North,Allen Lazard,WR,60.1
+2023,14,140,Michael's Neat Team,San Francisco,DEF,137.0
+2023,15,141,Michael's Neat Team,Courtland Sutton,WR,189.0
+2023,15,142,King Of The North,Harrison Butker,K,146.0
+2023,15,143,The Deshaun Rub Down,Philadelphia,DEF,96.0
+2023,15,144,OBtoshi Nakamoto,Buffalo,DEF,147.0
+2023,15,145,Broken Football,Daniel Carlson,K,111.0
+2023,15,146,Front Gate Dragon,New England,DEF,106.0
+2023,15,147,Sportins Squad,Evan McPherson,K,132.0
+2023,15,148,🍆🐒💨,Younghoe Koo,K,133.0
+2023,15,149,Lord of Lakengren,Tyler Bass,K,130.0
+2023,15,150,Chili Cheese Burritos,Cincinnati,DEF,110.0
+2023,16,151,Chili Cheese Burritos,Riley Patterson,K,91.0
+2023,16,152,Lord of Lakengren,New York,DEF,139.0
+2023,16,153,🍆🐒💨,Baker Mayfield,QB,284.81
+2023,16,154,Sportins Squad,Miami,DEF,143.0
+2023,16,155,Front Gate Dragon,Jason Myers,K,151.0
+2023,16,156,Broken Football,Baltimore,DEF,166.0
+2023,16,157,OBtoshi Nakamoto,Brandon McManus,K,137.0
+2023,16,158,The Deshaun Rub Down,Jason Sanders,K,144.0
+2023,16,159,King Of The North,Cleveland,DEF,153.0
+2023,16,160,Michael's Neat Team,Jake Ferguson,TE,164.2
+2024,1,1,Michael's Neat Team,Patrick Mahomes,QB,295.74
+2024,1,2,The Deshaun Rub Down,Josh Allen,QB,397.73
+2024,1,3,Munchin’ 🐱,Jalen Hurts,QB,322.09000000000003
+2024,1,4,Lord of Lakengren,CeeDee Lamb,WR,263.40000000000003
+2024,1,5,Front Gate Dragon,Christian McCaffrey,RB,47.800000000000004
+2024,1,6,Sportins Squad,Tyreek Hill,WR,214.2
+2024,1,7,OBtoshi Nakamoto,Lamar Jackson,QB,445.85
+2024,1,8,King Of The North,Joe Burrow,QB,397.43
+2024,1,9,Broken Football,Amon-Ra St. Brown,WR,304.40999999999997
+2024,1,10,Chili Cheese Burritos,Dak Prescott,QB,118.74
+2024,2,11,Chili Cheese Burritos,Anthony Richardson Sr.,QB,161.22
+2024,2,12,Broken Football,Jonathan Taylor,RB,219.7
+2024,2,13,King Of The North,Ja'Marr Chase,WR,377.4
+2024,2,14,OBtoshi Nakamoto,Breece Hall,RB,222.70000000000002
+2024,2,15,Sportins Squad,Bijan Robinson,RB,310.40000000000003
+2024,2,16,Front Gate Dragon,Justin Jefferson,WR,308.86
+2024,2,17,Lord of Lakengren,A.J. Brown,WR,216.9
+2024,2,18,Munchin’ 🐱,Saquon Barkley,RB,355.3
+2024,2,19,The Deshaun Rub Down,Puka Nacua,WR,206.6
+2024,2,20,Michael's Neat Team,Jahmyr Gibbs,RB,316.90000000000003
+2024,3,21,Michael's Neat Team,Travis Kelce,TE,195.4
+2024,3,22,The Deshaun Rub Down,Marvin Harrison Jr.,WR,179.2
+2024,3,23,Munchin’ 🐱,Garrett Wilson,WR,242.8
+2024,3,24,Lord of Lakengren,Jayden Daniels,QB,366.3
+2024,3,25,Front Gate Dragon,Kyren Williams,RB,272.1
+2024,3,26,Sportins Squad,Sam LaPorta,TE,161.3
+2024,3,27,OBtoshi Nakamoto,Joe Mixon,RB,236.7
+2024,3,28,King Of The North,Derrick Henry,RB,306.3
+2024,3,29,Broken Football,Deebo Samuel,WR,153.6
+2024,3,30,Chili Cheese Burritos,Travis Etienne Jr.,RB,121.2
+2024,4,31,Chili Cheese Burritos,Davante Adams,WR,220.5
+2024,4,32,Broken Football,Tua Tagovailoa,QB,190.91
+2024,4,33,King Of The North,Trevor Lawrence,QB,146.75
+2024,4,34,OBtoshi Nakamoto,Mike Evans,WR,222.5
+2024,4,35,Sportins Squad,Jared Goff,QB,343.24
+2024,4,36,Front Gate Dragon,Caleb Williams,QB,247.69
+2024,4,37,Lord of Lakengren,Kirk Cousins,QB,177.24
+2024,4,38,Munchin’ 🐱,Josh Jacobs,RB,281.5
+2024,4,39,The Deshaun Rub Down,Justin Herbert,QB,264.12
+2024,4,40,Michael's Neat Team,Matthew Stafford,QB,216.96
+2024,5,41,Michael's Neat Team,Rashee Rice,WR,64.9
+2024,5,42,The Deshaun Rub Down,Rachaad White,RB,199.60000000000002
+2024,5,43,Munchin’ 🐱,Trey McBride,TE,230.3
+2024,5,44,Lord of Lakengren,Kenneth Walker III,RB,181.2
+2024,5,45,Front Gate Dragon,Cooper Kupp,WR,175.0
+2024,5,46,Sportins Squad,James Cook,RB,257.90000000000003
+2024,5,47,OBtoshi Nakamoto,Drake London,WR,240.1
+2024,5,48,King Of The North,Chris Olave,WR,76.7
+2024,5,49,Broken Football,D'Andre Swift,RB,202.0
+2024,5,50,Chili Cheese Burritos,Mark Andrews,TE,173.4
+2024,6,51,Chili Cheese Burritos,Michael Pittman Jr.,WR,152.6
+2024,6,52,Broken Football,Jaylen Waddle,WR,140.6
+2024,6,53,King Of The North,Nico Collins,WR,195.8
+2024,6,54,OBtoshi Nakamoto,DJ Moore,WR,216.0
+2024,6,55,Sportins Squad,Stefon Diggs,WR,121.78999999999999
+2024,6,56,Front Gate Dragon,Dalton Kincaid,TE,100.8
+2024,6,57,Lord of Lakengren,James Conner,RB,253.8
+2024,6,58,Munchin’ 🐱,DK Metcalf,WR,176.9
+2024,6,59,The Deshaun Rub Down,George Kittle,TE,231.9
+2024,6,60,Michael's Neat Team,Isiah Pacheco,RB,56.900000000000006
+2024,7,61,Michael's Neat Team,Amari Cooper,WR,122.7
+2024,7,62,The Deshaun Rub Down,Rhamondre Stevenson,RB,175.9
+2024,7,63,Munchin’ 🐱,Kyler Murray,QB,267.27
+2024,7,64,Lord of Lakengren,Kyle Pitts Sr.,TE,127.7
+2024,7,65,Front Gate Dragon,Malik Nabers,WR,256.20000000000005
+2024,7,66,Sportins Squad,Keon Coleman,WR,105.5
+2024,7,67,OBtoshi Nakamoto,Evan Engram,TE,89.5
+2024,7,68,King Of The North,DeVonta Smith,WR,199.4
+2024,7,69,Broken Football,Jake Ferguson,TE,101.2
+2024,7,70,Chili Cheese Burritos,Alvin Kamara,RB,265.3
+2024,8,71,Chili Cheese Burritos,Brandon Aiyuk,WR,62.400000000000006
+2024,8,72,Broken Football,Javonte Williams,RB,147.1
+2024,8,73,King Of The North,Aaron Jones Sr.,RB,229.10000000000002
+2024,8,74,OBtoshi Nakamoto,Jaylen Warren,RB,122.0
+2024,8,75,Sportins Squad,David Montgomery,RB,223.69
+2024,8,76,Front Gate Dragon,Raheem Mostert,RB,70.9
+2024,8,77,Lord of Lakengren,Aaron Rodgers,QB,243.39000000000001
+2024,8,78,Munchin’ 🐱,Nick Chubb,RB,63.3
+2024,8,79,The Deshaun Rub Down,Zamir White,RB,29.3
+2024,8,80,Michael's Neat Team,Najee Harris,RB,189.0
+2024,9,81,Michael's Neat Team,Tank Dell,WR,140.0
+2024,9,82,The Deshaun Rub Down,Deshaun Watson,QB,75.24000000000001
+2024,9,83,Munchin’ 🐱,Tee Higgins,WR,212.8
+2024,9,84,Lord of Lakengren,Zay Flowers,WR,206.4
+2024,9,85,Front Gate Dragon,Brock Purdy,QB,268.21999999999997
+2024,9,86,Sportins Squad,Jordan Love,QB,247.9
+2024,9,87,OBtoshi Nakamoto,Devin Singletary,RB,93.9
+2024,9,88,King Of The North,Tony Pollard,RB,194.5
+2024,9,89,Broken Football,Baker Mayfield,QB,379.37
+2024,9,90,Chili Cheese Burritos,Christian Kirk,WR,70.9
+2024,10,91,Chili Cheese Burritos,Zack Moss,RB,81.9
+2024,10,92,Broken Football,Christian Watson,WR,105.3
+2024,10,93,King Of The North,David Njoku,TE,148.5
+2024,10,94,OBtoshi Nakamoto,C.J. Stroud,QB,215.61
+2024,10,95,Sportins Squad,Geno Smith,QB,232.70999999999998
+2024,10,96,Front Gate Dragon,Terry McLaurin,WR,247.60000000000002
+2024,10,97,Lord of Lakengren,Brian Robinson Jr.,RB,157.2
+2024,10,98,Munchin’ 🐱,Chris Godwin,WR,137.8
+2024,10,99,The Deshaun Rub Down,George Pickens,WR,163.4
+2024,10,100,Michael's Neat Team,Austin Ekeler,RB,127.10000000000001
+2024,11,101,Michael's Neat Team,Jayden Reed,WR,191.9
+2024,11,102,The Deshaun Rub Down,Rome Odunze,WR,141.1
+2024,11,103,Munchin’ 🐱,Jonathon Brooks,RB,7.5
+2024,11,104,Lord of Lakengren,Keenan Allen,WR,180.9
+2024,11,105,Front Gate Dragon,Daniel Jones,QB,130.6
+2024,11,106,Sportins Squad,Tyler Lockett,WR,116.2
+2024,11,107,OBtoshi Nakamoto,Jaxon Smith-Njigba,WR,247.35
+2024,11,108,King Of The North,Sam Darnold,QB,328.79
+2024,11,109,Broken Football,Ladd McConkey,WR,224.4
+2024,11,110,Chili Cheese Burritos,Tyjae Spears,RB,113.6
+2024,12,111,Chili Cheese Burritos,Xavier Worthy,WR,187.2
+2024,12,112,Broken Football,Bo Nix,QB,299.12
+2024,12,113,King Of The North,Cleveland,DEF,82.0
+2024,12,114,OBtoshi Nakamoto,Russell Wilson,QB,167.92
+2024,12,115,Sportins Squad,Romeo Doubs,WR,132.1
+2024,12,116,Front Gate Dragon,Brock Bowers,TE,247.70000000000002
+2024,12,117,Lord of Lakengren,Hollywood Brown,WR,18.1
+2024,12,118,Munchin’ 🐱,Bryce Young,QB,161.06
+2024,12,119,The Deshaun Rub Down,Jerome Ford,RB,134.0
+2024,12,120,Michael's Neat Team,Chuba Hubbard,RB,241.60000000000002
+2024,13,121,Michael's Neat Team,Gardner Minshew,QB,94.19
+2024,13,122,The Deshaun Rub Down,San Francisco,DEF,88.0
+2024,13,123,Munchin’ 🐱,Gus Edwards,RB,64.1
+2024,13,124,Lord of Lakengren,Will Levis,QB,112.98
+2024,13,125,Front Gate Dragon,Blake Corum,RB,30.3
+2024,13,126,Sportins Squad,Ezekiel Elliott,RB,57.5
+2024,13,127,OBtoshi Nakamoto,Dallas,DEF,103.0
+2024,13,128,King Of The North,Drake Maye,QB,184.38
+2024,13,129,Broken Football,De'Von Achane,RB,281.8
+2024,13,130,Chili Cheese Burritos,Unknown Player,Unknown,0.0
+2024,14,131,Chili Cheese Burritos,Justin Fields,QB,118.08
+2024,14,132,Broken Football,Calvin Ridley,WR,188.9
+2024,14,133,King Of The North,Tyler Allgeier,RB,97.3
+2024,14,134,OBtoshi Nakamoto,Harrison Butker,K,100.0
+2024,14,135,Sportins Squad,Justin Tucker,K,138.0
+2024,14,136,Front Gate Dragon,Baltimore,DEF,104.0
+2024,14,137,Lord of Lakengren,Rico Dowdle,RB,181.4
+2024,14,138,Munchin’ 🐱,Las Vegas,DEF,71.0
+2024,14,139,The Deshaun Rub Down,Derek Carr,QB,159.45
+2024,14,140,Michael's Neat Team,Brandon Aubrey,K,178.0
+2024,15,141,Michael's Neat Team,Chase Brown,RB,255.0
+2024,15,142,The Deshaun Rub Down,Trey Benson,RB,47.0
+2024,15,143,Munchin’ 🐱,Younghoe Koo,K,120.0
+2024,15,144,Lord of Lakengren,New York,DEF,82.0
+2024,15,145,Front Gate Dragon,Khalil Shakir,WR,182.5
+2024,15,146,Sportins Squad,Jerry Jeudy,WR,228.6
+2024,15,147,OBtoshi Nakamoto,Jordan Addison,WR,211.5
+2024,15,148,King Of The North,Dustin Hopkins,K,80.0
+2024,15,149,Broken Football,Jake Elliott,K,133.0
+2024,15,150,Chili Cheese Burritos,DeAndre Hopkins,WR,147.0
+2024,16,151,Chili Cheese Burritos,Unknown Player,Unknown,0.0
+2024,16,152,Broken Football,Pittsburgh,DEF,137.0
+2024,16,153,King Of The North,Pat Freiermuth,TE,145.8
+2024,16,154,OBtoshi Nakamoto,J.K. Dobbins,RB,181.3
+2024,16,155,Sportins Squad,Detroit,DEF,117.0
+2024,16,156,Front Gate Dragon,Tyler Bass,K,141.0
+2024,16,157,Lord of Lakengren,Jason Sanders,K,158.0
+2024,16,158,Munchin’ 🐱,Brian Thomas Jr.,WR,266.7
+2024,16,159,The Deshaun Rub Down,Greg Zuerlein,K,41.0
+2024,16,160,Michael's Neat Team,Cincinnati,DEF,97.0

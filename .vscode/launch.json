@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+    
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Streamlit FF Dashboard",
+            "type": "debugpy", 
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "streamlit_app_pick.py",
+                "--server.port=8502",
+                "--logger.level=debug"
+            ],
+            "cwd": "${workspaceFolder}/ff-dash",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                // "PYTHONPATH": "${workspaceFolder}/ff-dash"
+                "PYTHONPATH": "/home/cheif_y/projects/venvs/scratch/bin/python3"
+            }
+        }        
+    ]
+}
