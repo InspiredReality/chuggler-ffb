@@ -1,11 +1,12 @@
 """
 Shared data loading, analysis, and UI helpers for the Fantasy Football
 Analytics Dashboard multipage app. Imported by streamlit_app_pick.py
-(the entry page) and every page in pages/.
+(the st.navigation() router) and every page in app_pages/.
 
 This module must not call any Streamlit rendering commands at import
-time - st.set_page_config() has to be the first Streamlit call on each
-page, so all UI here lives inside functions the pages call explicitly.
+time - st.set_page_config() has to be the first Streamlit call in the
+app, so all UI here lives inside functions the router/pages call
+explicitly.
 """
 
 import streamlit as st
@@ -17,7 +18,8 @@ from pathlib import Path
 
 
 def configure_page(page_title, page_icon="🏈"):
-    """Call first, before any other Streamlit command, on every page."""
+    """Call once, first thing, in the entry-point router script only -
+    st.set_page_config() errors if called more than once per app run."""
     st.set_page_config(
         page_title=page_title,
         page_icon=page_icon,

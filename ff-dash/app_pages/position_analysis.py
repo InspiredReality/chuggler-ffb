@@ -1,8 +1,6 @@
 import streamlit as st
 import plotly.express as px
 from dashboard_common import (
-    configure_page,
-    inject_custom_css,
     load_all_data,
     render_sidebar_filters,
     apply_filters,
@@ -10,9 +8,6 @@ from dashboard_common import (
     calculate_avg_points_per_position,
     calculate_position_volatility,
 )
-
-configure_page("Position Analysis", page_icon="📊")
-inject_custom_css()
 
 master_df, adp_df = load_all_data()
 

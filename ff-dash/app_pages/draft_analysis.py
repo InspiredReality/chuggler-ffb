@@ -1,8 +1,6 @@
 import streamlit as st
 import plotly.express as px
 from dashboard_common import (
-    configure_page,
-    inject_custom_css,
     load_all_data,
     load_draft_data,
     render_sidebar_filters,
@@ -12,9 +10,6 @@ from dashboard_common import (
     analyze_draft_value_picks,
     create_draft_scatterplot_with_dynamic_trendline,
 )
-
-configure_page("Draft Analysis", page_icon="📈")
-inject_custom_css()
 
 master_df, adp_df = load_all_data()
 
