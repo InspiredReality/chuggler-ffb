@@ -287,7 +287,8 @@ def create_player_tiers_by_position(df, method='natural_breaks'):
         
         return group
     
-    player_tiers = player_season_avg.groupby(['position', 'year']).apply(assign_natural_tiers).reset_index(drop=True)
+    tiered_groups = [assign_natural_tiers(group) for _, group in player_season_avg.groupby(['position', 'year'])]
+    player_tiers = pd.concat(tiered_groups, ignore_index=True) if tiered_groups else player_season_avg
     return player_tiers
 
 def create_player_rank_analysis(df):
@@ -303,15 +304,16 @@ def create_player_rank_analysis(df):
     
     # Filter for significant playing time
     player_season_totals = player_season_totals[player_season_totals['week'] >= 4]
-    
+
     # Calculate overall rank across all positions for each year
-    def assign_overall_rank(group):
-        group = group.sort_values('player_fantasy_pts', ascending=False)
-        group['overall_rank'] = range(1, len(group) + 1)
-        return group
-    
-    ranked_players = player_season_totals.groupby('year').apply(assign_overall_rank).reset_index(drop=True)
-    
+    player_season_totals['overall_rank'] = (
+        player_season_totals.groupby('year')['player_fantasy_pts']
+        .rank(method='first', ascending=False)
+        .astype(int)
+    )
+
+    ranked_players = player_season_totals.sort_values(['year', 'overall_rank']).reset_index(drop=True)
+
     return ranked_players
 
 def create_team_analysis(df):
