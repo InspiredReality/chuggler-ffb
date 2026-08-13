@@ -644,15 +644,25 @@ def create_draft_scatterplot_with_dynamic_trendline(draft_df, selected_positions
     return fig
 
 
+def _readable_text_color(hex_color):
+    """Pick black or white text for readable contrast against hex_color."""
+    hex_color = hex_color.lstrip('#')
+    r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+    luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return '#000000' if luminance > 0.6 else '#FFFFFF'
+
+
 def create_draft_position_grid_html(draft_df, selected_positions):
     """
     Build a round x draft-slot grid (as an HTML table) showing which
-    position was picked at each slot across all years. Each cell holds
-    one small swatch per year in draft_df, left to right in ascending
-    year order, colored by position; a swatch is left blank when its
-    position isn't in selected_positions. Unlike the scatterplot, this
-    intentionally ignores the year sidebar filter - the whole point is
-    comparing the same slot across every year that has data.
+    position was picked at each slot across all years, and how many
+    fantasy points that player scored that season. Each cell holds one
+    row per year in draft_df, stacked top to bottom in ascending year
+    order, colored by position with the season point total as its
+    label; a row is left blank when its position isn't in
+    selected_positions. Unlike the scatterplot, this intentionally
+    ignores the year sidebar filter - the whole point is comparing the
+    same slot across every year that has data.
     """
     if draft_df.empty:
         return "<p>No draft data available.</p>"
@@ -668,26 +678,27 @@ def create_draft_position_grid_html(draft_df, selected_positions):
     slots = list(range(1, n_slots + 1))
 
     lookup = df.set_index(['year', 'round', 'pick_in_round'])[
-        ['position', 'player_name', 'team_name']
+        ['position', 'player_name', 'team_name', 'season_points']
     ].to_dict('index')
 
     parts = ['''
     <style>
     .draft-grid-wrap { overflow-x: auto; }
     .draft-grid { border-collapse: collapse; font-size: 12px; }
-    .draft-grid th, .draft-grid td { border: 1px solid rgba(128,128,128,0.3); padding: 3px; text-align: center; }
+    .draft-grid th, .draft-grid td { border: 1px solid rgba(128,128,128,0.3); padding: 3px; text-align: center; vertical-align: top; }
     .draft-grid th { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
     .draft-round-label { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
-    .draft-cell { display: flex; gap: 2px; justify-content: center; }
-    .draft-swatch { width: 12px; height: 20px; border-radius: 2px; }
-    .draft-swatch-empty { width: 12px; height: 20px; border-radius: 2px; border: 1px dashed rgba(128,128,128,0.25); }
+    .draft-cell { display: flex; flex-direction: column; gap: 2px; }
+    .draft-swatch { min-width: 40px; padding: 1px 4px; border-radius: 3px; font-size: 10px; line-height: 15px; white-space: nowrap; }
+    .draft-swatch-empty { min-width: 40px; height: 17px; border-radius: 3px; border: 1px dashed rgba(128,128,128,0.25); }
     .draft-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 12px 0; font-size: 12px; }
     .draft-legend-item { display: flex; align-items: center; gap: 4px; }
     </style>
     ''']
 
     parts.append('<div class="draft-legend">')
-    parts.append(f'<div class="draft-legend-item"><strong>Years per cell (left→right):</strong> {" → ".join(str(y) for y in years)}</div>')
+    parts.append(f'<div class="draft-legend-item"><strong>Years per cell (top→bottom):</strong> {" → ".join(str(y) for y in years)}</div>')
+    parts.append('<div class="draft-legend-item">Number shown = total fantasy points that season</div>')
     parts.append('</div>')
 
     parts.append('<div class="draft-grid-wrap"><table class="draft-grid"><thead><tr><th>Round</th>')
@@ -703,9 +714,12 @@ def create_draft_position_grid_html(draft_df, selected_positions):
                 entry = lookup.get((yr, rnd, s))
                 if entry and entry['position'] in selected_positions:
                     color = POSITION_COLORS.get(entry['position'], '#999999')
-                    title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']}"
+                    text_color = _readable_text_color(color)
+                    pts = entry['season_points']
+                    pts_label = f"{pts:.0f}" if pd.notna(pts) else "–"
+                    title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']} - {pts_label} pts"
                     parts.append(
-                        f'<div class="draft-swatch" style="background:{color}" title="{html.escape(title)}"></div>'
+                        f'<div class="draft-swatch" style="background:{color};color:{text_color}" title="{html.escape(title)}">{html.escape(pts_label)}</div>'
                     )
                 else:
                     parts.append('<div class="draft-swatch-empty"></div>')

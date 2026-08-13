@@ -133,7 +133,7 @@ else:
 
         # Position-by-slot grid across all years
         st.subheader("🗺️ Position Drafted by Round & Pick")
-        st.write("Each cell is one round × pick slot. The small swatches inside show the position taken at that slot, one per year with data (left to right). Click a position below to toggle it in the grid.")
+        st.write("Each cell is one round × pick slot. Rows inside a cell show the position taken at that slot each year (top to bottom) and how many fantasy points that player scored that season. Click a position below to toggle it in the grid.")
 
         preferred_order = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K']
         grid_positions_available = sorted(draft_df['position'].dropna().unique())
