@@ -1,3 +1,4 @@
+# rebuild-marker: 2
 streamlit
 plotly
 pandas
