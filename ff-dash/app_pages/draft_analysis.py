@@ -9,6 +9,7 @@ from dashboard_common import (
     analyze_draft_strategy_effectiveness,
     analyze_draft_value_picks,
     create_draft_scatterplot_with_dynamic_trendline,
+    create_draft_position_grid_html,
 )
 
 master_df, adp_df = load_all_data()
@@ -128,6 +129,14 @@ else:
         }).round(1)
         league_round_analysis.columns = ['Avg Points', 'Std Dev', 'Total Picks', 'Unique Players']
         st.dataframe(league_round_analysis, use_container_width=True)
+
+        # Position-by-slot grid across all years
+        st.subheader("🗺️ Position Drafted by Round & Pick")
+        st.write("Each cell is one round × pick slot. The small swatches inside show the position taken at that slot, one per year with data (left to right).")
+        st.markdown(
+            create_draft_position_grid_html(draft_df, selected_positions),
+            unsafe_allow_html=True,
+        )
 
     with strategy_tab:
         st.subheader("🧠 Draft Strategy Effectiveness")

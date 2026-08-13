@@ -14,7 +14,24 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+import html
 from pathlib import Path
+
+
+# Fixed position -> color mapping, shared by every chart/table that
+# breaks data out by position, so a position keeps the same color
+# everywhere regardless of which positions happen to be selected in
+# the sidebar filter (Plotly's default coloring reassigns colors when
+# the set of categories present in the data changes).
+POSITION_COLORS = {
+    'QB': '#636EFA',
+    'RB': '#EF553B',
+    'WR': '#00CC96',
+    'TE': '#AB63FA',
+    'DEF': '#FFA15A',
+    'K': '#19D3F3',
+    'Unknown': '#7F7F7F',
+}
 
 
 def configure_page(page_title, page_icon="🏈"):
@@ -564,6 +581,7 @@ def create_draft_scatterplot_with_dynamic_trendline(draft_df, selected_positions
         x='pick',
         y='season_points',
         color='position',
+        color_discrete_map=POSITION_COLORS,
         hover_data=['player_name', 'year', 'team_name', 'round'],
         title='Draft Position vs Season Points in Your League',
         labels={
@@ -624,3 +642,86 @@ def create_draft_scatterplot_with_dynamic_trendline(draft_df, selected_positions
     )
 
     return fig
+
+
+def create_draft_position_grid_html(draft_df, selected_positions):
+    """
+    Build a round x draft-slot grid (as an HTML table) showing which
+    position was picked at each slot across all years. Each cell holds
+    one small swatch per year in draft_df, left to right in ascending
+    year order, colored by position; a swatch is left blank when its
+    position isn't in selected_positions. Unlike the scatterplot, this
+    intentionally ignores the year sidebar filter - the whole point is
+    comparing the same slot across every year that has data.
+    """
+    if draft_df.empty:
+        return "<p>No draft data available.</p>"
+
+    df = draft_df.copy()
+    teams_per_year = df.groupby('year')['team_name'].nunique().to_dict()
+    df['n_slots'] = df['year'].map(teams_per_year)
+    df['pick_in_round'] = ((df['pick'] - 1) % df['n_slots']) + 1
+
+    years = sorted(df['year'].unique())
+    rounds = sorted(df['round'].unique())
+    n_slots = int(df['n_slots'].max())
+    slots = list(range(1, n_slots + 1))
+
+    lookup = df.set_index(['year', 'round', 'pick_in_round'])[
+        ['position', 'player_name', 'team_name']
+    ].to_dict('index')
+
+    parts = ['''
+    <style>
+    .draft-grid-wrap { overflow-x: auto; }
+    .draft-grid { border-collapse: collapse; font-size: 12px; }
+    .draft-grid th, .draft-grid td { border: 1px solid rgba(128,128,128,0.3); padding: 3px; text-align: center; }
+    .draft-grid th { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
+    .draft-round-label { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
+    .draft-cell { display: flex; gap: 2px; justify-content: center; }
+    .draft-swatch { width: 12px; height: 20px; border-radius: 2px; }
+    .draft-swatch-empty { width: 12px; height: 20px; border-radius: 2px; border: 1px dashed rgba(128,128,128,0.25); }
+    .draft-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 12px 0; font-size: 12px; }
+    .draft-legend-item { display: flex; align-items: center; gap: 4px; }
+    .draft-legend-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+    </style>
+    ''']
+
+    preferred_order = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K', 'Unknown']
+    legend_positions = [p for p in preferred_order if p in selected_positions] + [
+        p for p in selected_positions if p not in preferred_order
+    ]
+    parts.append('<div class="draft-legend">')
+    parts.append(f'<div class="draft-legend-item"><strong>Years per cell (left→right):</strong> {" → ".join(str(y) for y in years)}</div>')
+    for pos in legend_positions:
+        color = POSITION_COLORS.get(pos, '#999999')
+        parts.append(
+            f'<div class="draft-legend-item"><span class="draft-legend-swatch" style="background:{color}"></span>{html.escape(pos)}</div>'
+        )
+    parts.append('</div>')
+
+    parts.append('<div class="draft-grid-wrap"><table class="draft-grid"><thead><tr><th>Round</th>')
+    for s in slots:
+        parts.append(f'<th>Pick {s}</th>')
+    parts.append('</tr></thead><tbody>')
+
+    for rnd in rounds:
+        parts.append(f'<tr><td class="draft-round-label">R{rnd}</td>')
+        for s in slots:
+            parts.append('<td><div class="draft-cell">')
+            for yr in years:
+                entry = lookup.get((yr, rnd, s))
+                if entry and entry['position'] in selected_positions:
+                    color = POSITION_COLORS.get(entry['position'], '#999999')
+                    title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']}"
+                    parts.append(
+                        f'<div class="draft-swatch" style="background:{color}" title="{html.escape(title)}"></div>'
+                    )
+                else:
+                    parts.append('<div class="draft-swatch-empty"></div>')
+            parts.append('</div></td>')
+        parts.append('</tr>')
+
+    parts.append('</tbody></table></div>')
+
+    return ''.join(parts)
