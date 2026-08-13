@@ -683,21 +683,11 @@ def create_draft_position_grid_html(draft_df, selected_positions):
     .draft-swatch-empty { width: 12px; height: 20px; border-radius: 2px; border: 1px dashed rgba(128,128,128,0.25); }
     .draft-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 12px 0; font-size: 12px; }
     .draft-legend-item { display: flex; align-items: center; gap: 4px; }
-    .draft-legend-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
     </style>
     ''']
 
-    preferred_order = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K', 'Unknown']
-    legend_positions = [p for p in preferred_order if p in selected_positions] + [
-        p for p in selected_positions if p not in preferred_order
-    ]
     parts.append('<div class="draft-legend">')
     parts.append(f'<div class="draft-legend-item"><strong>Years per cell (left→right):</strong> {" → ".join(str(y) for y in years)}</div>')
-    for pos in legend_positions:
-        color = POSITION_COLORS.get(pos, '#999999')
-        parts.append(
-            f'<div class="draft-legend-item"><span class="draft-legend-swatch" style="background:{color}"></span>{html.escape(pos)}</div>'
-        )
     parts.append('</div>')
 
     parts.append('<div class="draft-grid-wrap"><table class="draft-grid"><thead><tr><th>Round</th>')

@@ -10,6 +10,7 @@ from dashboard_common import (
     analyze_draft_value_picks,
     create_draft_scatterplot_with_dynamic_trendline,
     create_draft_position_grid_html,
+    POSITION_COLORS,
 )
 
 master_df, adp_df = load_all_data()
@@ -132,9 +133,29 @@ else:
 
         # Position-by-slot grid across all years
         st.subheader("🗺️ Position Drafted by Round & Pick")
-        st.write("Each cell is one round × pick slot. The small swatches inside show the position taken at that slot, one per year with data (left to right).")
+        st.write("Each cell is one round × pick slot. The small swatches inside show the position taken at that slot, one per year with data (left to right). Click a position below to toggle it in the grid.")
+
+        preferred_order = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K']
+        grid_positions_available = sorted(draft_df['position'].dropna().unique())
+        ordered_grid_positions = [p for p in preferred_order if p in grid_positions_available] + [
+            p for p in grid_positions_available if p not in preferred_order
+        ]
+
+        grid_cols = st.columns(len(ordered_grid_positions))
+        grid_selected_positions = []
+        for i, pos in enumerate(ordered_grid_positions):
+            color = POSITION_COLORS.get(pos, '#999999')
+            with grid_cols[i]:
+                st.markdown(
+                    f'<div style="width:16px;height:16px;border-radius:3px;background:{color};margin:0 auto 4px auto;"></div>',
+                    unsafe_allow_html=True,
+                )
+                checked = st.checkbox(pos, value=(pos in selected_positions), key=f"grid_pos_{pos}")
+            if checked:
+                grid_selected_positions.append(pos)
+
         st.markdown(
-            create_draft_position_grid_html(draft_df, selected_positions),
+            create_draft_position_grid_html(draft_df, grid_selected_positions),
             unsafe_allow_html=True,
         )
 
