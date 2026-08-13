@@ -7,6 +7,8 @@ from dashboard_common import (
     render_data_summary,
     calculate_avg_points_per_position,
     calculate_position_volatility,
+    calculate_position_percentile_bands,
+    format_percentile_band_table,
 )
 
 master_df, adp_df = load_all_data()
@@ -49,3 +51,9 @@ summary = filtered_df.groupby('position').agg({
 }).round(2)
 summary.columns = ['Avg Points', 'Std Dev', 'Total Games', 'Unique Players']
 st.dataframe(summary, use_container_width=True)
+
+st.subheader("🏅 Player Tiers by Percentile")
+st.write("Players are ranked by their season point total within each position/year, then bucketed into fixed percentile bands (same cutoffs across every position, so bands are directly comparable). Each cell shows that band's average season points and player count.")
+band_stats = calculate_position_percentile_bands(filtered_df)
+band_table = format_percentile_band_table(band_stats)
+st.dataframe(band_table, use_container_width=True, hide_index=True)

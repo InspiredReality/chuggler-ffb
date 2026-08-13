@@ -378,6 +378,72 @@ def create_player_rank_analysis(df):
     return ranked_players
 
 
+PERCENTILE_BAND_LABELS = ['Top 10% (90%+)', '75-89%', '50-74%', '25-49%', 'Bottom 25% (<25%)']
+
+
+def calculate_position_percentile_bands(df):
+    """
+    For each (position, year), rank players by their season point total
+    and bucket them into fixed percentile bands - unlike
+    create_player_tiers_by_position, these band cutoffs (90th, 75th,
+    50th, 25th percentile) are the same for every position, so bands
+    are directly comparable across positions rather than tuned per
+    position's shape.
+
+    Returns one row per (position, year, band) with that band's average
+    season point total and how many players fall in it.
+    """
+    season_totals = df.groupby(['player_name_full', 'position', 'year']).agg(
+        season_points=('player_fantasy_pts', 'sum'),
+        games=('week', 'count'),
+    ).reset_index()
+
+    season_totals = season_totals[season_totals['games'] >= 4]
+
+    season_totals['percentile'] = (
+        season_totals.groupby(['position', 'year'])['season_points']
+        .rank(pct=True, ascending=True)
+    )
+
+    bins = [-0.01, 0.25, 0.50, 0.75, 0.90, 1.01]
+    season_totals['band'] = pd.cut(
+        season_totals['percentile'], bins=bins, labels=list(reversed(PERCENTILE_BAND_LABELS))
+    )
+
+    band_stats = season_totals.groupby(['position', 'year', 'band'], observed=True).agg(
+        avg_points=('season_points', 'mean'),
+        player_count=('season_points', 'count'),
+    ).reset_index()
+
+    return band_stats
+
+
+def format_percentile_band_table(band_stats):
+    """
+    Pivot calculate_position_percentile_bands()'s long output into a
+    display-ready table: one row per (position, year), one column per
+    band, each cell showing that band's average season points and
+    player count as a single readable string.
+    """
+    if band_stats.empty:
+        return pd.DataFrame(columns=['Position', 'Year'] + PERCENTILE_BAND_LABELS)
+
+    band_stats = band_stats.copy()
+    band_stats['cell'] = band_stats.apply(
+        lambda r: f"{r['avg_points']:.1f} pts (n={r['player_count']})", axis=1
+    )
+
+    pivoted = band_stats.pivot_table(
+        index=['position', 'year'], columns='band', values='cell', aggfunc='first', observed=True
+    )
+    pivoted = pivoted.reindex(columns=PERCENTILE_BAND_LABELS)
+    pivoted = pivoted.fillna('–')
+    pivoted = pivoted.reset_index().rename(columns={'position': 'Position', 'year': 'Year'})
+    pivoted = pivoted.sort_values(['Position', 'Year']).reset_index(drop=True)
+
+    return pivoted
+
+
 def create_team_analysis(df):
     """Analysis 7: Team analysis"""
     team_performance = df.groupby(['team_name', 'year']).agg({
