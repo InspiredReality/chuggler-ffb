@@ -2,9 +2,11 @@ import streamlit as st
 import plotly.express as px
 from dashboard_common import (
     load_all_data,
+    load_draft_data,
     render_sidebar_filters,
     apply_filters,
     render_data_summary,
+    get_season_point_totals,
     create_player_rank_analysis,
     calculate_avg_points_per_player,
     create_player_tiers_by_position,
@@ -27,22 +29,24 @@ render_data_summary(filtered_df)
 
 st.header("👤 Player Analysis")
 
-ranked_players = create_player_rank_analysis(filtered_df)
+draft_df = load_draft_data()
+season_totals = get_season_point_totals(master_df, draft_df, selected_years, selected_positions)
+ranked_players = create_player_rank_analysis(season_totals)
 
 st.subheader("🎯 Player Performance by Rank (Multi-Year View)")
-st.write("Each dot represents one player's season. Players who played multiple years have multiple dots.")
+st.write("Each dot represents one player's season. Players who played multiple years have multiple dots. Years without weekly stats yet (e.g. a season mid-draft) are ranked using draft-day season point totals instead.")
 
 if not ranked_players.empty:
     fig_scatter = px.scatter(
         ranked_players,
         x='overall_rank',
-        y='player_fantasy_pts',
+        y='season_points',
         color='position',
-        hover_data=['player_name_full', 'year', 'week'],
+        hover_data=['player_name_full', 'year'],
         title='Fantasy Points vs Overall Rank by Position',
         labels={
             'overall_rank': 'Overall Rank (1 = Best)',
-            'player_fantasy_pts': 'Total Fantasy Points for Season',
+            'season_points': 'Total Fantasy Points for Season',
             'position': 'Position'
         },
         height=500
@@ -61,11 +65,11 @@ if not ranked_players.empty:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        top_scorer = ranked_players.loc[ranked_players['player_fantasy_pts'].idxmax()]
+        top_scorer = ranked_players.loc[ranked_players['season_points'].idxmax()]
         st.metric(
             "🏆 Highest Single Season",
             f"{top_scorer['player_name_full']}",
-            f"{top_scorer['player_fantasy_pts']:.1f} pts ({top_scorer['year']})"
+            f"{top_scorer['season_points']:.1f} pts ({top_scorer['year']})"
         )
 
     with col2:
@@ -74,7 +78,7 @@ if not ranked_players.empty:
         st.metric("📅 Max Years Played", most_consistent, f"by {multi_year_players.idxmax()}")
 
     with col3:
-        avg_top10 = ranked_players[ranked_players['overall_rank'] <= 10]['player_fantasy_pts'].mean()
+        avg_top10 = ranked_players[ranked_players['overall_rank'] <= 10]['season_points'].mean()
         st.metric("🎯 Top 10 Avg Points", f"{avg_top10:.1f}")
 
 col1, col2 = st.columns(2)

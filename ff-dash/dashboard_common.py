@@ -363,25 +363,71 @@ def create_player_tiers_by_position(df, method='natural_breaks'):
     return player_tiers
 
 
-def create_player_rank_analysis(df):
+def get_season_point_totals(master_df, draft_df, selected_years, selected_positions):
     """
-    Create yearly player rankings for scatterplot
-    Each player gets a rank within their position for each year they played
+    Season point total per player/position/year, sourced from weekly
+    stats (master_df) where available and supplemented by
+    draft_results.csv's season_points for any selected year master_df
+    doesn't cover yet - e.g. a season's draft happens before any weekly
+    stats exist for it, so a new year shows up in draft_results.csv
+    first.
+
+    Weekly-stats years require >=4 games played to qualify (filters out
+    tiny/inactive-week noise); draft-sourced years have no games count
+    to filter on, so every drafted player at that position/year is
+    included as-is. Note draft-sourced years only cover the ~160
+    players actually drafted that year, not the full rostered/
+    free-agent pool weekly-stats years have (~469 players total) - so
+    a draft-sourced year's numbers aren't directly apples-to-apples
+    with a weekly-stats year's.
+
+    Returns columns: player_name_full, position, year, season_points,
+    games (NaN for draft-sourced rows).
     """
-    player_season_totals = df.groupby(['player_name_full', 'position', 'year']).agg({
-        'player_fantasy_pts': 'sum',  # Total points for the year
-        'week': 'count'  # Games played
-    }).reset_index()
+    master_years = set(master_df['year'].unique())
 
-    player_season_totals = player_season_totals[player_season_totals['week'] >= 4]
+    weekly_totals = master_df[
+        master_df['year'].isin(selected_years) & master_df['position'].isin(selected_positions)
+    ].groupby(['player_name_full', 'position', 'year']).agg(
+        season_points=('player_fantasy_pts', 'sum'),
+        games=('week', 'count'),
+    ).reset_index()
+    weekly_totals = weekly_totals[weekly_totals['games'] >= 4]
 
-    player_season_totals['overall_rank'] = (
-        player_season_totals.groupby('year')['player_fantasy_pts']
+    draft_only_years = [y for y in selected_years if y not in master_years]
+
+    if draft_only_years and draft_df is not None and not draft_df.empty:
+        draft_totals = draft_df[
+            draft_df['year'].isin(draft_only_years) & draft_df['position'].isin(selected_positions)
+        ][['player_name', 'position', 'year', 'season_points']].rename(
+            columns={'player_name': 'player_name_full'}
+        )
+        draft_totals['games'] = np.nan
+        combined = pd.concat([weekly_totals, draft_totals], ignore_index=True)
+    else:
+        combined = weekly_totals
+
+    return combined
+
+
+def create_player_rank_analysis(season_totals):
+    """
+    Rank players within each year by season point total.
+
+    Takes the output of get_season_point_totals() - one row per
+    player/position/year with a season_points total - rather than raw
+    weekly rows, so it works for both weekly-stats years and
+    draft-results-only years alike.
+    """
+    ranked_players = season_totals.copy()
+
+    ranked_players['overall_rank'] = (
+        ranked_players.groupby('year')['season_points']
         .rank(method='first', ascending=False)
         .astype(int)
     )
 
-    ranked_players = player_season_totals.sort_values(['year', 'overall_rank']).reset_index(drop=True)
+    ranked_players = ranked_players.sort_values(['year', 'overall_rank']).reset_index(drop=True)
 
     return ranked_players
 
@@ -389,7 +435,7 @@ def create_player_rank_analysis(df):
 PERCENTILE_BAND_LABELS = ['Top 10% (90%+)', '75-89%', '50-74%', '25-49%', 'Bottom 25% (<25%)']
 
 
-def calculate_position_percentile_bands(df):
+def calculate_position_percentile_bands(season_totals):
     """
     For each (position, year), rank players by their season point total
     and bucket them into fixed percentile bands - unlike
@@ -398,15 +444,14 @@ def calculate_position_percentile_bands(df):
     are directly comparable across positions rather than tuned per
     position's shape.
 
+    Takes the output of get_season_point_totals() rather than raw
+    weekly rows, so it works for both weekly-stats years and
+    draft-results-only years alike.
+
     Returns one row per (position, year, band) with that band's average
     season point total and how many players fall in it.
     """
-    season_totals = df.groupby(['player_name_full', 'position', 'year']).agg(
-        season_points=('player_fantasy_pts', 'sum'),
-        games=('week', 'count'),
-    ).reset_index()
-
-    season_totals = season_totals[season_totals['games'] >= 4]
+    season_totals = season_totals.copy()
 
     season_totals['percentile'] = (
         season_totals.groupby(['position', 'year'])['season_points']

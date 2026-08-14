@@ -2,9 +2,11 @@ import streamlit as st
 import plotly.express as px
 from dashboard_common import (
     load_all_data,
+    load_draft_data,
     render_sidebar_filters,
     apply_filters,
     render_data_summary,
+    get_season_point_totals,
     calculate_avg_points_per_position,
     calculate_position_volatility,
     calculate_position_percentile_bands,
@@ -53,7 +55,9 @@ summary.columns = ['Avg Points', 'Std Dev', 'Total Games', 'Unique Players']
 st.dataframe(summary, use_container_width=True)
 
 st.subheader("🏅 Player Tiers by Percentile")
-st.write("Players are ranked by their season point total within each position/year, then bucketed into fixed percentile bands (same cutoffs across every position, so bands are directly comparable). Each cell shows that band's average season points and player count.")
-band_stats = calculate_position_percentile_bands(filtered_df)
+st.write("Players are ranked by their season point total within each position/year, then bucketed into fixed percentile bands (same cutoffs across every position, so bands are directly comparable). Each cell shows that band's average season points and player count. Years without weekly stats yet use draft-day season point totals instead - covering only drafted players, not the full rostered/free-agent pool other years have.")
+draft_df = load_draft_data()
+season_totals = get_season_point_totals(master_df, draft_df, selected_years, selected_positions)
+band_stats = calculate_position_percentile_bands(season_totals)
 band_table = format_percentile_band_table(band_stats)
 st.dataframe(band_table, use_container_width=True, hide_index=True)
