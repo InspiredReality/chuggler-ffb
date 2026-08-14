@@ -216,7 +216,8 @@ def render_sidebar_filters(master_df, extra_years=None):
     st.sidebar.header("🎛️ Controls")
 
     st.sidebar.subheader("📅 Select Years")
-    years = sorted(set(master_df['year'].unique()) | set(extra_years or []))
+    extra_years_set = set(extra_years) if extra_years is not None else set()
+    years = sorted(set(master_df['year'].unique()) | extra_years_set)
 
     cols = st.sidebar.columns(len(years))
     selected_years = []
