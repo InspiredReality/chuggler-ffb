@@ -10,6 +10,9 @@ from dashboard_common import (
     analyze_draft_value_picks,
     create_draft_scatterplot_with_dynamic_trendline,
     create_draft_position_grid_html,
+    load_adp_for_year,
+    build_2026_draft_plan,
+    render_draft_plan_html,
     POSITION_COLORS,
 )
 
@@ -51,10 +54,11 @@ get_league_draft_results(weekly_stats_df)
     st.write("- Team drafting performance comparison")
 
 else:
-    draft_overview_tab, strategy_tab, value_tab = st.tabs([
+    draft_overview_tab, strategy_tab, value_tab, plan_tab = st.tabs([
         "📊 Draft Overview",
         "🧠 Strategy Analysis",
-        "💎 Value Analysis"
+        "💎 Value Analysis",
+        "🔮 2026"
     ])
 
     with draft_overview_tab:
@@ -312,3 +316,71 @@ else:
                 st.warning("⚠️ No matching data between draft and ADP files")
         else:
             st.info("ADP data required for value analysis")
+
+    with plan_tab:
+        st.subheader("🔮 2026 Draft Plan")
+
+        n_teams = int(draft_df.groupby('year')['team_name'].nunique().max())
+        qbs_per_team = draft_df[draft_df['position'] == 'QB'].groupby(
+            ['year', 'team_name']).size().mean()
+
+        st.write(
+            f"Round-by-round targets for your pick slot, built from this league's own draft "
+            f"history. Each round shows the position that has actually worked at that pick and "
+            f"how confident that read is; the named players come from the 2026 ADP board."
+        )
+
+        if qbs_per_team >= 2:
+            st.info(
+                f"⚡ **This is a superflex/2QB league** — {qbs_per_team:.1f} QBs drafted per team "
+                f"per year. QB is the premium position here, and the plan below weights it "
+                f"accordingly."
+            )
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            slot = st.number_input(
+                "Your draft slot", min_value=1, max_value=n_teams, value=min(2, n_teams), step=1,
+                help="Where you pick in round 1. Snake order is handled automatically.",
+            )
+        with col_b:
+            n_rounds = st.number_input(
+                "Rounds", min_value=1, max_value=30,
+                value=int(draft_df['round'].max()), step=1,
+            )
+
+        adp_2026 = load_adp_for_year(2026)
+        has_adp = not adp_2026.empty
+
+        if has_adp:
+            st.caption(f"ADP board: {len(adp_2026)} players loaded from `data/ADP_2026.csv`.")
+        else:
+            st.warning(
+                "📋 **No 2026 ADP board yet.** The position calls and confidence below are ready "
+                "— they come from your league's draft history and don't need ADP. Add "
+                "`ff-dash/data/ADP_2026.csv` (columns: `Player`, `Pos`, `AVG Draft Position` — "
+                "same format as the existing ADP files) and this tab will name real players at "
+                "every pick, rookies included."
+            )
+
+        plan = build_2026_draft_plan(draft_df, adp_2026, int(slot), n_teams, int(n_rounds))
+
+        your_picks = ", ".join(str(row['overall']) for row in plan)
+        st.caption(f"Your picks from slot {int(slot)} in a {n_teams}-team snake: {your_picks}")
+
+        st.markdown(render_draft_plan_html(plan, has_adp), unsafe_allow_html=True)
+
+        with st.expander("How confidence is calculated"):
+            st.markdown(
+                "Every pick you own is located in the league's draft history, with a window of "
+                "±3 overall picks around it. Within that window two things are measured:\n\n"
+                "- **Availability** — how often that position was actually taken there\n"
+                "- **Hit rate** — how often the player taken beat that position's average "
+                "score for that season\n\n"
+                "Confidence is `0.45 × availability + 0.55 × hit rate`, then pulled toward 50% "
+                "in proportion to sample size (`n / (n+4)`) so a 3-pick sample can't masquerade "
+                "as a certainty. It ranks options against each other — read it as signal "
+                "strength, not as a probability.\n\n"
+                "Suggestions per round scale with uncertainty: 1 for rounds 1–3, 2 for rounds "
+                "4–7, 3 from round 8 on."
+            )

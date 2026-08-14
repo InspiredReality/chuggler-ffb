@@ -15,6 +15,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import html
+import re
 from pathlib import Path
 
 
@@ -882,4 +883,310 @@ def create_draft_position_grid_html(draft_df, selected_positions):
 
     parts.append('</tbody></table></div>')
 
+    return ''.join(parts)
+
+
+# ---------------------------------------------------------------------------
+# 2026 draft planning
+# ---------------------------------------------------------------------------
+
+# How many suggestions to surface per round. Early picks are close to
+# deterministic (one clear call); later picks are a lottery, so show
+# more shots on goal.
+SUGGESTIONS_PER_ROUND = {
+    **{r: 1 for r in range(1, 4)},
+    **{r: 2 for r in range(4, 8)},
+    **{r: 3 for r in range(8, 17)},
+}
+
+
+def normalize_adp_position(pos):
+    """
+    ADP files carry positions like 'RB', but also 'K1'/'K9' (kicker with
+    a rank suffix), 'DS'/'DST' (defense) and IDP codes. Reduce them to
+    the same vocabulary the draft/stats files use.
+    """
+    if not isinstance(pos, str):
+        return 'Unknown'
+    p = pos.strip().upper()
+    p = re.sub(r'\d+$', '', p)  # 'K1' -> 'K', 'WR12' -> 'WR'
+    if p in ('DS', 'DST', 'D/ST', 'DEF'):
+        return 'DEF'
+    if p in ('PK', 'K'):
+        return 'K'
+    if p in ('QB', 'RB', 'WR', 'TE'):
+        return p
+    return 'Unknown'
+
+
+@st.cache_data
+def load_adp_for_year(year):
+    """
+    Load a single season's ADP file (e.g. data/ADP_2026.csv), normalized
+    to columns: player_name, position, adp. Returns an empty frame when
+    that year's file hasn't been added yet.
+    """
+    path = Path(f"ff-dash/data/ADP_{year}.csv")
+    if not path.exists():
+        return pd.DataFrame(columns=['player_name', 'position', 'adp'])
+
+    raw = pd.read_csv(path)
+
+    name_col = next((c for c in ['Player', 'player_name', 'Name'] if c in raw.columns), None)
+    pos_col = next((c for c in ['Pos', 'position', 'Position'] if c in raw.columns), None)
+    adp_col = next(
+        (c for c in ['AVG Draft Position', 'adp', 'ADP', 'AVG'] if c in raw.columns), None
+    )
+    if not (name_col and pos_col and adp_col):
+        return pd.DataFrame(columns=['player_name', 'position', 'adp'])
+
+    out = raw[[name_col, pos_col, adp_col]].copy()
+    out.columns = ['player_name', 'position', 'adp']
+    out['position'] = out['position'].apply(normalize_adp_position)
+    out['adp'] = pd.to_numeric(out['adp'], errors='coerce')
+    out = out.dropna(subset=['adp', 'player_name'])
+
+    return out.sort_values('adp').reset_index(drop=True)
+
+
+def compute_snake_picks(slot, n_teams, n_rounds=16):
+    """
+    Overall pick numbers owned by `slot` in a snake draft. Odd rounds run
+    1..n_teams, even rounds reverse, so slot 2 of 10 owns 2, 19, 22, 39...
+    """
+    picks = []
+    for rnd in range(1, n_rounds + 1):
+        if rnd % 2 == 1:
+            overall = (rnd - 1) * n_teams + slot
+        else:
+            overall = (rnd - 1) * n_teams + (n_teams - slot + 1)
+        picks.append({'round': rnd, 'overall': overall})
+    return picks
+
+
+def compute_slot_blueprint(draft_df, slot, n_teams, n_rounds=16, window=3):
+    """
+    For each pick the slot owns, rank positions by how well they've
+    worked at that spot historically.
+
+    Two ingredients per position, measured over every pick within
+    +/-`window` overall picks across all years in draft_df:
+      availability - how often that position was actually taken there
+      hit rate     - how often the player taken beat that position's
+                     average score for that season
+
+    confidence = 0.45*availability + 0.55*hit, pulled toward 50% by
+    n/(n+4) so a 3-pick sample can't masquerade as a certainty. It's a
+    weighting heuristic for ranking options, not a calibrated
+    probability.
+    """
+    if draft_df.empty:
+        return []
+
+    d = draft_df.copy()
+    pos_year_avg = d.groupby(['position', 'year'])['season_points'].mean().rename('pos_year_avg')
+    d = d.merge(pos_year_avg, on=['position', 'year'])
+    d['beat_avg'] = d['season_points'] > d['pos_year_avg']
+
+    blueprint = []
+    for pick in compute_snake_picks(slot, n_teams, n_rounds):
+        overall = pick['overall']
+        near = d[(d['pick'] >= overall - window) & (d['pick'] <= overall + window)]
+        total = len(near)
+
+        options = []
+        for pos, grp in near.groupby('position'):
+            n = len(grp)
+            if n < 3 or pos == 'Unknown':
+                continue
+            availability = n / total
+            hit = grp['beat_avg'].mean()
+            raw = 0.45 * availability + 0.55 * hit
+            confidence = 0.5 + (raw - 0.5) * (n / (n + 4))
+            options.append({
+                'position': pos,
+                'confidence': round(confidence * 100),
+                'availability': round(availability * 100),
+                'hit_rate': round(hit * 100),
+                'sample': n,
+                'avg_points': round(grp['season_points'].mean()),
+            })
+
+        options.sort(key=lambda o: -o['confidence'])
+        blueprint.append({**pick, 'options': options})
+
+    return blueprint
+
+
+def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
+    """
+    Pair the historical blueprint with a current ADP board to name real
+    players. Walks rounds in order, only ever suggesting players who
+    could plausibly still be on the board at that pick (ADP not far
+    ahead of it), and never suggests the same player twice.
+
+    Without an ADP board this still returns the blueprint - the position
+    calls and confidence come from the league's own history and don't
+    depend on ADP.
+    """
+    blueprint = compute_slot_blueprint(draft_df, slot, n_teams, n_rounds)
+    has_adp = adp_df is not None and not adp_df.empty
+
+    board = adp_df.copy() if has_adp else None
+    taken = set()
+
+    for row in blueprint:
+        overall = row['overall']
+        n_want = SUGGESTIONS_PER_ROUND.get(row['round'], 2)
+        row['targets'] = []
+
+        if not has_adp:
+            continue
+
+        # A player whose ADP is well ahead of this pick is realistically
+        # gone; allow a small cushion for players who slide.
+        available = board[(board['adp'] >= overall - 8) & (~board['player_name'].isin(taken))]
+
+        for option in row['options']:
+            if len(row['targets']) >= n_want:
+                break
+            candidates = available[available['position'] == option['position']]
+            if candidates.empty:
+                continue
+            pick_row = candidates.iloc[0]
+            taken.add(pick_row['player_name'])
+            available = available[available['player_name'] != pick_row['player_name']]
+            row['targets'].append({
+                'player_name': pick_row['player_name'],
+                'position': option['position'],
+                'adp': pick_row['adp'],
+                'confidence': option['confidence'],
+                'hit_rate': option['hit_rate'],
+                'avg_points': option['avg_points'],
+                'sample': option['sample'],
+            })
+
+        # If the top positions are picked clean, fall back to best
+        # available overall so the round still returns something usable.
+        while len(row['targets']) < n_want and not available.empty:
+            pick_row = available.iloc[0]
+            taken.add(pick_row['player_name'])
+            available = available[available['player_name'] != pick_row['player_name']]
+            match = next(
+                (o for o in row['options'] if o['position'] == pick_row['position']), None
+            )
+            row['targets'].append({
+                'player_name': pick_row['player_name'],
+                'position': pick_row['position'],
+                'adp': pick_row['adp'],
+                'confidence': match['confidence'] if match else None,
+                'hit_rate': match['hit_rate'] if match else None,
+                'avg_points': match['avg_points'] if match else None,
+                'sample': match['sample'] if match else None,
+            })
+
+    return blueprint
+
+
+def render_draft_plan_html(plan, has_adp):
+    """Render build_2026_draft_plan()'s output as a compact round-by-round board."""
+    if not plan:
+        return "<p>No draft history available to build a plan from.</p>"
+
+    parts = ['''
+    <style>
+    .plan { display: flex; flex-direction: column; gap: 10px; }
+    .plan-round { border: 1px solid rgba(128,128,128,0.3); border-radius: 8px; overflow: hidden; }
+    .plan-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+                 padding: 8px 12px; background: rgba(128,128,128,0.12); }
+    .plan-rd { font-weight: 700; font-size: 15px; }
+    .plan-ov { font-size: 11px; opacity: .7; border: 1px solid rgba(128,128,128,0.4);
+               border-radius: 3px; padding: 1px 5px; font-variant-numeric: tabular-nums; }
+    .plan-conf { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .plan-conf-n { font-size: 12px; font-weight: 600; opacity: .85; font-variant-numeric: tabular-nums; }
+    .plan-bar { width: 52px; height: 5px; border-radius: 3px; background: rgba(128,128,128,0.3); overflow: hidden; }
+    .plan-fill { height: 100%; background: #636EFA; border-radius: 3px; }
+    .plan-why { padding: 7px 12px; font-size: 12.5px; opacity: .8;
+                border-bottom: 1px solid rgba(128,128,128,0.25); }
+    .plan-target { display: grid; grid-template-columns: 42px 1fr auto; gap: 10px;
+                   align-items: center; padding: 8px 12px;
+                   border-bottom: 1px solid rgba(128,128,128,0.18); }
+    .plan-target:last-child { border-bottom: none; }
+    .plan-pos { font-size: 11px; font-weight: 700; text-align: center; padding: 2px 0;
+                border-radius: 3px; color: #fff; }
+    .plan-name { font-weight: 600; font-size: 14px; }
+    .plan-sub { display: block; font-weight: 400; font-size: 11px; opacity: .65; margin-top: 1px; }
+    .plan-adp { font-size: 11.5px; opacity: .7; text-align: right;
+                font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .plan-delta { display: block; font-size: 10.5px; margin-top: 1px; font-weight: 600; }
+    .plan-delta.reach { color: #E8833A; }
+    .plan-delta.value { color: #00A578; }
+    .plan-delta.ontime { opacity: .55; font-weight: 400; }
+    .plan-empty { padding: 10px 12px; font-size: 12.5px; opacity: .7; font-style: italic; }
+    </style>
+    <div class="plan">
+    ''']
+
+    for row in plan:
+        top = row['options'][0] if row['options'] else None
+        conf = top['confidence'] if top else 0
+        parts.append('<div class="plan-round">')
+        parts.append(
+            f'<div class="plan-head"><span class="plan-rd">Round {row["round"]}</span>'
+            f'<span class="plan-ov">pick {row["overall"]} overall</span>'
+            f'<span class="plan-conf"><span class="plan-conf-n">{conf}%</span>'
+            f'<span class="plan-bar"><span class="plan-fill" style="width:{conf}%"></span></span>'
+            f'</span></div>'
+        )
+
+        if top:
+            parts.append(
+                f'<div class="plan-why">Historically at this pick: <b>{html.escape(top["position"])}</b> '
+                f'taken {top["availability"]}% of the time, beating its position average '
+                f'{top["hit_rate"]}% of the time for {top["avg_points"]} pts (n={top["sample"]}).</div>'
+            )
+
+        if row['targets']:
+            for t in row['targets']:
+                color = POSITION_COLORS.get(t['position'], '#999999')
+                text_color = _readable_text_color(color)
+                sub = (
+                    f'{t["hit_rate"]}% hit rate here across {t["sample"]} picks'
+                    if t['hit_rate'] is not None else 'best available on the board'
+                )
+                # ADP relative to the pick you actually own: a player whose
+                # ADP sits well after your pick is one you'd be reaching for
+                # (you can likely wait a round); one whose ADP is ahead of it
+                # is falling to you.
+                delta = t['adp'] - row['overall']
+                if delta >= 10:
+                    d_cls, d_txt = 'reach', f'reach {delta:.0f}'
+                elif delta <= -5:
+                    d_cls, d_txt = 'value', f'value {abs(delta):.0f}'
+                else:
+                    d_cls, d_txt = 'ontime', 'on time'
+                parts.append(
+                    f'<div class="plan-target">'
+                    f'<span class="plan-pos" style="background:{color};color:{text_color}">'
+                    f'{html.escape(t["position"])}</span>'
+                    f'<span class="plan-name">{html.escape(str(t["player_name"]))}'
+                    f'<span class="plan-sub">{html.escape(sub)}</span></span>'
+                    f'<span class="plan-adp">ADP {t["adp"]:.1f}'
+                    f'<span class="plan-delta {d_cls}">{d_txt}</span></span>'
+                    f'</div>'
+                )
+        elif not has_adp:
+            alts = ", ".join(
+                f'{o["position"]} {o["confidence"]}%' for o in row['options'][:3]
+            )
+            parts.append(
+                f'<div class="plan-empty">Position call ready — add ADP to name players. '
+                f'Ranked here: {html.escape(alts)}</div>'
+            )
+        else:
+            parts.append('<div class="plan-empty">No players left on the ADP board for this pick.</div>')
+
+        parts.append('</div>')
+
+    parts.append('</div>')
     return ''.join(parts)
