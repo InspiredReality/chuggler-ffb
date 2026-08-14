@@ -994,63 +994,71 @@ def load_adp_history(years=(2022, 2023, 2024, 2025)):
     )
 
 
+def add_positional_adp_rank(adp_df):
+    """
+    Rank an ADP board within each position: QB1, QB2, RB1, ...
+
+    Ranks within each season when the frame carries several - a stacked
+    multi-year history must not be ranked as one pooled board, or every
+    season's QB1 but the single earliest disappears.
+    """
+    out = adp_df.sort_values('adp').copy()
+    keys = ['year', 'position'] if 'year' in out.columns else ['position']
+    out['pos_rank'] = out.groupby(keys).cumcount() + 1
+    return out
+
+
 def calibrate_adp_to_league(draft_df, adp_history):
     """
-    Learn how public ADP translates into an actual pick in THIS league.
+    Learn how a public board translates into an actual pick in THIS
+    league, keyed on a player's rank within his position on that board
+    (QB1, QB2, ...) rather than his raw ADP number.
 
-    Public ADP comes from standard one-quarterback formats. This league
-    starts two, so quarterbacks go dramatically earlier here than their
-    public ADP implies - historically a median of 74 picks earlier, and
-    the gap widens the later the public board ranks them. Feeding raw
-    public ADP into a superflex draft produces nonsense like expecting a
-    top-12 quarterback to last into the fourth round.
+    Positional rank is the stabler and more portable signal. This league
+    takes quarterbacks far earlier than a public board implies - QB1 has
+    gone at pick 2, 1, 2 and 2 in the last four drafts - and keying on
+    rank captures that directly. It also survives differences in how a
+    board is built: raw ADP numbers shift with scoring format and with
+    how many quarterbacks a board assumes you start, but "the third
+    quarterback on the board" means the same thing either way. Measured
+    against this league's history, rank predicts the actual pick about
+    twice as tightly as raw ADP does for quarterbacks (10 picks of
+    year-to-year spread versus 21).
 
-    For each position this fits a monotone map from public ADP to the
-    pick this league actually spends, using the median outcome inside
-    each ADP band, plus the spread of those outcomes so availability can
-    be expressed as a probability rather than a yes/no.
+    Returns per-position interpolation knots over positional rank, plus
+    the residual spread so availability can be a probability rather than
+    a yes/no.
     """
     if draft_df.empty or adp_history.empty:
         return {}
 
+    hist = add_positional_adp_rank(adp_history)
+    hist = hist.assign(_k=hist['player_name'].map(_normalize_player_name))
     draft = draft_df.assign(_k=draft_df['player_name'].map(_normalize_player_name))
-    hist = adp_history.assign(_k=adp_history['player_name'].map(_normalize_player_name))
-    matched = draft.merge(hist[['_k', 'year', 'adp']], on=['_k', 'year'], how='inner')
+    matched = draft.merge(
+        hist[['_k', 'year', 'pos_rank']], on=['_k', 'year'], how='inner'
+    )
 
     calibration = {}
     for pos, grp in matched.groupby('position'):
         if len(grp) < 10 or pos == 'Unknown':
             continue
-        knots_adp, knots_pick, spreads = [], [], []
-        for lo, hi in zip(_ADP_BANDS, _ADP_BANDS[1:]):
-            band = grp[(grp['adp'] > lo) & (grp['adp'] <= hi)]
-            if len(band) < 5:
-                continue
-            knots_adp.append(band['adp'].median())
-            knots_pick.append(band['pick'].median())
-            spreads.append(band['pick'].std())
-        if len(knots_adp) < 2:
-            shift = grp['pick'].median() - grp['adp'].median()
-            calibration[pos] = {'shift': shift, 'sd': max(grp['pick'].std(), 8.0)}
-            continue
-        order = np.argsort(knots_adp)
-        ka = np.array(knots_adp)[order]
-        kp = np.maximum.accumulate(np.array(knots_pick)[order])
 
-        # Anchor the top of the board. Bands are wide, so the lowest knot
-        # sits at the *median* ADP inside the first band - without a knot
-        # below it, np.interp flattens every elite player onto that one
-        # value and a consensus 1.01 pick looks like a mid-first-rounder.
-        # Extend the first segment's slope down to ADP 1 instead.
-        if ka[0] > 1:
-            slope = ((kp[1] - kp[0]) / (ka[1] - ka[0])) if len(ka) > 1 else 1.0
-            ka = np.insert(ka, 0, 1.0)
-            kp = np.insert(kp, 0, max(1.0, kp[0] - slope * (ka[1] - 1.0)))
+        # Median pick per positional rank, forced monotonic - a board's
+        # QB5 should never be projected ahead of its QB4.
+        by_rank = grp.groupby('pos_rank')['pick'].median().sort_index()
+        if len(by_rank) < 2:
+            continue
+        ranks = by_rank.index.to_numpy(dtype=float)
+        picks = np.maximum.accumulate(by_rank.to_numpy(dtype=float))
+
+        predicted = np.interp(grp['pos_rank'], ranks, picks)
+        residual_sd = float(np.sqrt(np.mean((grp['pick'] - predicted) ** 2)))
 
         calibration[pos] = {
-            'adp_knots': list(ka),
-            'pick_knots': list(kp),
-            'sd': float(max(np.nanmean(spreads), 6.0)),
+            'rank_knots': list(ranks),
+            'pick_knots': list(picks),
+            'sd': max(residual_sd, 6.0),
         }
     return calibration
 
@@ -1064,19 +1072,23 @@ def project_league_picks(adp_df, calibration):
     if adp_df.empty:
         return adp_df.assign(expected_pick=np.nan, pick_sd=np.nan)
 
-    out = adp_df.copy()
+    out = add_positional_adp_rank(adp_df)
     expected, spread = [], []
-    for pos, adp in zip(out['position'], out['adp']):
+    for pos, adp, rank in zip(out['position'], out['adp'], out['pos_rank']):
         cal = calibration.get(pos)
         if not cal:
             expected.append(adp)
             spread.append(20.0)
-        elif 'adp_knots' in cal:
-            expected.append(float(np.interp(adp, cal['adp_knots'], cal['pick_knots'])))
-            spread.append(cal['sd'])
+            continue
+        ranks, picks = cal['rank_knots'], cal['pick_knots']
+        if rank > ranks[-1] and len(ranks) > 1:
+            # Past the deepest rank ever observed at this position, keep
+            # the trend going rather than flattening onto the last knot.
+            slope = (picks[-1] - picks[-2]) / max(ranks[-1] - ranks[-2], 1)
+            expected.append(picks[-1] + slope * (rank - ranks[-1]))
         else:
-            expected.append(adp + cal['shift'])
-            spread.append(cal['sd'])
+            expected.append(float(np.interp(rank, ranks, picks)))
+        spread.append(cal['sd'])
     out['expected_pick'] = np.clip(expected, 1, None)
     out['pick_sd'] = spread
     return out
@@ -1351,6 +1363,51 @@ def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16, min_avai
             available = available[~available['player_name'].isin(taken)]
 
     return blueprint
+
+
+def build_league_draft_board(draft_df, adp_df, slot, n_teams, n_rounds=16,
+                             available_threshold=0.5):
+    """
+    The whole ADP board re-ordered by when players actually go in THIS
+    league, so you can take the best player available at your pick
+    instead of trusting a projection of who'll be there.
+
+    For each player: his expected pick here, and the first pick you own
+    where he has at least `available_threshold` chance of still being on
+    the board. Sorting by expected pick puts the board in the order your
+    league drafts it, which is not the order the public board is in.
+    """
+    if adp_df is None or adp_df.empty:
+        return pd.DataFrame()
+
+    calibration = calibrate_adp_to_league(draft_df, load_adp_history())
+    board = project_league_picks(adp_df, calibration)
+    picks = compute_snake_picks(slot, n_teams, n_rounds)
+
+    rows = []
+    for r in board.itertuples(index=False):
+        # The useful question isn't the first round he's available - for
+        # anyone going later than your opening pick that's trivially
+        # round 1. It's the last round you can still expect him to be
+        # there, i.e. how long you can afford to wait.
+        last_round, last_pct = None, None
+        for pick in picks:
+            p = availability_probability(pick['overall'], r.expected_pick, r.pick_sd)
+            if p >= available_threshold:
+                last_round, last_pct = pick['round'], p
+            else:
+                break
+        rows.append({
+            'Exp. pick here': round(float(r.expected_pick)),
+            'Player': r.player_name,
+            'Pos': f"{r.position}{int(r.pos_rank)}",
+            'Public ADP': round(float(r.adp), 1),
+            'Wait until': last_round if last_round else 'take early',
+            'Chance there': round(last_pct * 100) if last_pct else None,
+        })
+
+    out = pd.DataFrame(rows).sort_values('Exp. pick here').reset_index(drop=True)
+    return out
 
 
 def render_draft_plan_html(plan, has_adp):

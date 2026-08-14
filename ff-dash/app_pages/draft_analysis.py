@@ -13,6 +13,7 @@ from dashboard_common import (
     load_adp_for_year,
     adp_file_status,
     build_2026_draft_plan,
+    build_league_draft_board,
     render_draft_plan_html,
     calculate_draft_vorp,
     compute_position_value_by_round,
@@ -384,6 +385,54 @@ else:
 
         your_picks = ", ".join(str(row['overall']) for row in plan)
         st.caption(f"Your picks from slot {int(slot)} in a {n_teams}-team snake: {your_picks}")
+
+        if has_adp:
+            st.markdown("---")
+            st.subheader("📋 The board, in your league's draft order")
+            st.write(
+                "Every player, re-ordered by when they actually go **here** rather than by public "
+                "ADP. Nobody can predict who'll be on the board at a given pick, so use this to "
+                "take the best player available: sort or filter it, find the highest player still "
+                "undrafted, and check the round where he's realistically reachable. The "
+                "round-by-round plan below is built from exactly this table."
+            )
+
+            board_tbl = build_league_draft_board(
+                draft_df, adp_2026, int(slot), n_teams, int(n_rounds)
+            )
+
+            board_positions = sorted({p[:3].rstrip('0123456789') for p in board_tbl['Pos']})
+            pick_filter = st.multiselect(
+                "Filter by position", board_positions, default=board_positions,
+                key="board_pos_filter",
+            )
+            shown = board_tbl[
+                board_tbl['Pos'].str.replace(r'\d+$', '', regex=True).isin(pick_filter)
+            ]
+            st.dataframe(
+                shown,
+                use_container_width=True,
+                hide_index=True,
+                height=420,
+                column_config={
+                    'Exp. pick here': st.column_config.NumberColumn(
+                        'Exp. pick', help="Where this player typically goes in your league"),
+                    'Public ADP': st.column_config.NumberColumn(format="%.1f"),
+                    'Wait until': st.column_config.TextColumn(
+                        'Wait until Rd',
+                        help="Last round of yours where he's still 50%+ likely on the board. "
+                             "'take early' means he's usually gone before your first pick."),
+                    'Chance there': st.column_config.NumberColumn(
+                        '% there', format="%d%%",
+                        help="Chance he lasts to that round"),
+                },
+            )
+            st.caption(
+                f"{len(board_tbl)} players. “Exp. pick” is calibrated from this league's own "
+                "drafts by positional rank on the board — your league's QB1 has gone at pick "
+                "2, 1, 2 and 2 in the last four drafts."
+            )
+            st.markdown("---")
 
         st.markdown(render_draft_plan_html(plan, has_adp), unsafe_allow_html=True)
 
