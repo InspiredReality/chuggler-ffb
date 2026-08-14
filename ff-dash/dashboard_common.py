@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 import numpy as np
 import html
 import re
+import math
 from pathlib import Path
 
 
@@ -966,6 +967,133 @@ def load_adp_for_year(year):
     return out.sort_values('adp').reset_index(drop=True)
 
 
+def _normalize_player_name(name):
+    """Loose key for matching a player across the draft and ADP files."""
+    s = re.sub(r'[^a-z ]', '', str(name).lower())
+    s = re.sub(r'\b(jr|sr|ii|iii|iv|v)\b', '', s)
+    return re.sub(r'\s+', ' ', s).strip()
+
+
+# ADP bands used to calibrate public ADP against this league. QBs don't
+# shift by a constant amount - elite ones barely move off a low ADP while
+# late ones jump enormously - so the mapping is fitted per band rather
+# than as a single offset.
+_ADP_BANDS = [0, 25, 50, 100, 200, 10000]
+
+
+@st.cache_data
+def load_adp_history(years=(2022, 2023, 2024, 2025)):
+    """Every past season's ADP board, stacked, for calibration."""
+    frames = []
+    for year in years:
+        board = load_adp_for_year(year)
+        if not board.empty:
+            frames.append(board.assign(year=year))
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(
+        columns=['player_name', 'position', 'adp', 'year']
+    )
+
+
+def calibrate_adp_to_league(draft_df, adp_history):
+    """
+    Learn how public ADP translates into an actual pick in THIS league.
+
+    Public ADP comes from standard one-quarterback formats. This league
+    starts two, so quarterbacks go dramatically earlier here than their
+    public ADP implies - historically a median of 74 picks earlier, and
+    the gap widens the later the public board ranks them. Feeding raw
+    public ADP into a superflex draft produces nonsense like expecting a
+    top-12 quarterback to last into the fourth round.
+
+    For each position this fits a monotone map from public ADP to the
+    pick this league actually spends, using the median outcome inside
+    each ADP band, plus the spread of those outcomes so availability can
+    be expressed as a probability rather than a yes/no.
+    """
+    if draft_df.empty or adp_history.empty:
+        return {}
+
+    draft = draft_df.assign(_k=draft_df['player_name'].map(_normalize_player_name))
+    hist = adp_history.assign(_k=adp_history['player_name'].map(_normalize_player_name))
+    matched = draft.merge(hist[['_k', 'year', 'adp']], on=['_k', 'year'], how='inner')
+
+    calibration = {}
+    for pos, grp in matched.groupby('position'):
+        if len(grp) < 10 or pos == 'Unknown':
+            continue
+        knots_adp, knots_pick, spreads = [], [], []
+        for lo, hi in zip(_ADP_BANDS, _ADP_BANDS[1:]):
+            band = grp[(grp['adp'] > lo) & (grp['adp'] <= hi)]
+            if len(band) < 5:
+                continue
+            knots_adp.append(band['adp'].median())
+            knots_pick.append(band['pick'].median())
+            spreads.append(band['pick'].std())
+        if len(knots_adp) < 2:
+            shift = grp['pick'].median() - grp['adp'].median()
+            calibration[pos] = {'shift': shift, 'sd': max(grp['pick'].std(), 8.0)}
+            continue
+        order = np.argsort(knots_adp)
+        ka = np.array(knots_adp)[order]
+        kp = np.maximum.accumulate(np.array(knots_pick)[order])
+
+        # Anchor the top of the board. Bands are wide, so the lowest knot
+        # sits at the *median* ADP inside the first band - without a knot
+        # below it, np.interp flattens every elite player onto that one
+        # value and a consensus 1.01 pick looks like a mid-first-rounder.
+        # Extend the first segment's slope down to ADP 1 instead.
+        if ka[0] > 1:
+            slope = ((kp[1] - kp[0]) / (ka[1] - ka[0])) if len(ka) > 1 else 1.0
+            ka = np.insert(ka, 0, 1.0)
+            kp = np.insert(kp, 0, max(1.0, kp[0] - slope * (ka[1] - 1.0)))
+
+        calibration[pos] = {
+            'adp_knots': list(ka),
+            'pick_knots': list(kp),
+            'sd': float(max(np.nanmean(spreads), 6.0)),
+        }
+    return calibration
+
+
+def project_league_picks(adp_df, calibration):
+    """
+    Translate a public ADP board into expected pick numbers for this
+    league, adding `expected_pick` and `pick_sd`. Positions with no
+    calibration fall through unchanged.
+    """
+    if adp_df.empty:
+        return adp_df.assign(expected_pick=np.nan, pick_sd=np.nan)
+
+    out = adp_df.copy()
+    expected, spread = [], []
+    for pos, adp in zip(out['position'], out['adp']):
+        cal = calibration.get(pos)
+        if not cal:
+            expected.append(adp)
+            spread.append(20.0)
+        elif 'adp_knots' in cal:
+            expected.append(float(np.interp(adp, cal['adp_knots'], cal['pick_knots'])))
+            spread.append(cal['sd'])
+        else:
+            expected.append(adp + cal['shift'])
+            spread.append(cal['sd'])
+    out['expected_pick'] = np.clip(expected, 1, None)
+    out['pick_sd'] = spread
+    return out
+
+
+def availability_probability(overall_pick, expected_pick, pick_sd):
+    """
+    Chance a player is still on the board at `overall_pick`, treating his
+    actual draft slot as normal around `expected_pick`. Uses math.erf so
+    this doesn't pull in scipy.
+    """
+    if pd.isna(expected_pick) or pd.isna(pick_sd) or pick_sd <= 0:
+        return 0.0
+    z = (overall_pick - expected_pick) / pick_sd
+    return 1.0 - 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
+
+
 def compute_snake_picks(slot, n_teams, n_rounds=16):
     """
     Overall pick numbers owned by `slot` in a snake draft. Odd rounds run
@@ -1139,21 +1267,35 @@ def compute_slot_blueprint(draft_df, slot, n_teams, n_rounds=16, window=3):
     return blueprint
 
 
-def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
+def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16, min_availability=0.35):
     """
     Pair the historical blueprint with a current ADP board to name real
-    players. Walks rounds in order, only ever suggesting players who
-    could plausibly still be on the board at that pick (ADP not far
-    ahead of it), and never suggests the same player twice.
+    players.
+
+    Availability is judged against this league's own behaviour, not the
+    public board: public ADP is first mapped to an expected pick here
+    (see calibrate_adp_to_league), then a player only qualifies for a
+    pick if he has at least `min_availability` chance of lasting until
+    it. Without that step a superflex league's quarterbacks look
+    available rounds after they're actually gone.
+
+    Within a position the best player still on the board is taken, and
+    positions are tried in the order the blueprint ranks them by VORP -
+    so the league's own value curve chooses the position and the public
+    board chooses the player. No player is suggested twice.
 
     Without an ADP board this still returns the blueprint - the position
-    calls and confidence come from the league's own history and don't
-    depend on ADP.
+    calls come from draft history and don't depend on ADP.
     """
     blueprint = compute_slot_blueprint(draft_df, slot, n_teams, n_rounds)
     has_adp = adp_df is not None and not adp_df.empty
 
-    board = adp_df.copy() if has_adp else None
+    if has_adp:
+        calibration = calibrate_adp_to_league(draft_df, load_adp_history())
+        board = project_league_picks(adp_df, calibration).sort_values('adp')
+    else:
+        board = None
+
     taken = set()
 
     for row in blueprint:
@@ -1164,9 +1306,25 @@ def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
         if not has_adp:
             continue
 
-        # A player whose ADP is well ahead of this pick is realistically
-        # gone; allow a small cushion for players who slide.
-        available = board[(board['adp'] >= overall - 8) & (~board['player_name'].isin(taken))]
+        available = board[~board['player_name'].isin(taken)].copy()
+        available['p_available'] = [
+            availability_probability(overall, e, s)
+            for e, s in zip(available['expected_pick'], available['pick_sd'])
+        ]
+        available = available[available['p_available'] >= min_availability]
+
+        def _take(pick_row, option):
+            taken.add(pick_row['player_name'])
+            row['targets'].append({
+                'player_name': pick_row['player_name'],
+                'position': pick_row['position'],
+                'adp': pick_row['adp'],
+                'expected_pick': pick_row['expected_pick'],
+                'p_available': pick_row['p_available'],
+                'vorp': option['vorp'] if option else None,
+                'typical_finish': option['typical_finish'] if option else None,
+                'sample': option['sample'] if option else None,
+            })
 
         for option in row['options']:
             if len(row['targets']) >= n_want:
@@ -1174,35 +1332,23 @@ def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
             candidates = available[available['position'] == option['position']]
             if candidates.empty:
                 continue
-            pick_row = candidates.iloc[0]
-            taken.add(pick_row['player_name'])
-            available = available[available['player_name'] != pick_row['player_name']]
-            row['targets'].append({
-                'player_name': pick_row['player_name'],
-                'position': option['position'],
-                'adp': pick_row['adp'],
-                'vorp': option['vorp'],
-                'typical_finish': option['typical_finish'],
-                'sample': option['sample'],
-            })
+            _take(candidates.iloc[0], option)
+            available = available[~available['player_name'].isin(taken)]
 
-        # If the top positions are picked clean, fall back to best
-        # available overall so the round still returns something usable.
+        # If the ranked positions are picked clean, fall back to the best
+        # player still realistically available. The suggestions in a round
+        # are alternatives to each other, so prefer one at a position not
+        # already offered here - three defenses in a row is not a choice.
         while len(row['targets']) < n_want and not available.empty:
-            pick_row = available.iloc[0]
-            taken.add(pick_row['player_name'])
-            available = available[available['player_name'] != pick_row['player_name']]
+            offered = {t['position'] for t in row['targets']}
+            fresh = available[~available['position'].isin(offered)]
+            pool = fresh if not fresh.empty else available
+            pick_row = pool.iloc[0]
             match = next(
                 (o for o in row['options'] if o['position'] == pick_row['position']), None
             )
-            row['targets'].append({
-                'player_name': pick_row['player_name'],
-                'position': pick_row['position'],
-                'adp': pick_row['adp'],
-                'vorp': match['vorp'] if match else None,
-                'typical_finish': match['typical_finish'] if match else None,
-                'sample': match['sample'] if match else None,
-            })
+            _take(pick_row, match)
+            available = available[~available['player_name'].isin(taken)]
 
     return blueprint
 
@@ -1284,24 +1430,26 @@ def render_draft_plan_html(plan, has_adp):
                     f'{t["vorp"]:+.0f} VORP here · typically {t["position"]}{t["typical_finish"]}'
                     if t['vorp'] is not None else 'best available on the board'
                 )
-                # ADP relative to the pick you actually own: a player whose
-                # ADP sits well after your pick is one you'd be reaching for
-                # (you can likely wait a round); one whose ADP is ahead of it
-                # is falling to you.
-                delta = t['adp'] - row['overall']
-                if delta >= 10:
-                    d_cls, d_txt = 'reach', f'reach {delta:.0f}'
-                elif delta <= -5:
-                    d_cls, d_txt = 'value', f'value {abs(delta):.0f}'
+                # How likely he actually lasts to this pick in THIS league,
+                # not how his public ADP compares to it.
+                p = t.get('p_available')
+                if p is None:
+                    d_cls, d_txt = 'ontime', ''
+                elif p >= 0.7:
+                    d_cls, d_txt = 'value', f'{p * 100:.0f}% there'
+                elif p >= 0.5:
+                    d_cls, d_txt = 'ontime', f'{p * 100:.0f}% there'
                 else:
-                    d_cls, d_txt = 'ontime', 'on time'
+                    d_cls, d_txt = 'reach', f'{p * 100:.0f}% there'
+                exp = t.get('expected_pick')
+                exp_txt = f'exp pick {exp:.0f}' if exp is not None and not pd.isna(exp) else ''
                 parts.append(
                     f'<div class="plan-target">'
                     f'<span class="plan-pos" style="background:{color};color:{text_color}">'
                     f'{html.escape(t["position"])}</span>'
                     f'<span class="plan-name">{html.escape(str(t["player_name"]))}'
                     f'<span class="plan-sub">{html.escape(sub)}</span></span>'
-                    f'<span class="plan-adp">ADP {t["adp"]:.1f}'
+                    f'<span class="plan-adp">{html.escape(exp_txt)}'
                     f'<span class="plan-delta {d_cls}">{d_txt}</span></span>'
                     f'</div>'
                 )
