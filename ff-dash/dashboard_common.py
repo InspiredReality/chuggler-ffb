@@ -964,29 +964,124 @@ def compute_snake_picks(slot, n_teams, n_rounds=16):
     return picks
 
 
+# Startable roster spots per team, used to locate replacement level.
+# Superflex means ~2 QBs start; the flex is split across RB/WR. The
+# replacement player is the last one at that position who'd realistically
+# be in someone's starting lineup - everything below that is freely
+# available, so points above it are what a pick is actually worth.
+STARTERS_PER_TEAM = {'QB': 2.0, 'RB': 2.5, 'WR': 3.5, 'TE': 1.0, 'K': 1.0, 'DEF': 1.0}
+
+
+def calculate_draft_vorp(draft_df, n_teams=10):
+    """
+    Score every drafted player against replacement level at his own
+    position, for his own season.
+
+    Adds three columns:
+      pos_rank  - finish among all players drafted at that position that
+                  year (1 = best)
+      repl_pts  - the replacement-level score for that position/year
+      vorp      - season_points - repl_pts
+
+    VORP is the axis that makes positions comparable. Raw points can't:
+    QBs out-score kickers by 300 points a year, but a QB is only worth
+    what he beats the next available QB by. It also makes rounds
+    comparable within a position - a round-10 QB and a round-1 QB are
+    both measured against the same replacement QB, which answers "what
+    kind of QB does this pick actually get me" rather than "did he beat
+    the other players taken in round 10".
+    """
+    if draft_df.empty:
+        return draft_df.assign(pos_rank=np.nan, repl_pts=np.nan, vorp=np.nan)
+
+    frames = []
+    for (pos, _year), grp in draft_df[draft_df['position'] != 'Unknown'].groupby(
+        ['position', 'year']
+    ):
+        grp = grp.sort_values('season_points', ascending=False).reset_index(drop=True)
+        grp['pos_rank'] = grp.index + 1
+        starters = STARTERS_PER_TEAM.get(pos, 1.0)
+        repl_rank = min(max(int(round(starters * n_teams)), 1), len(grp))
+        grp['repl_pts'] = grp.loc[repl_rank - 1, 'season_points']
+        grp['vorp'] = grp['season_points'] - grp['repl_pts']
+        frames.append(grp)
+
+    return pd.concat(frames, ignore_index=True) if frames else draft_df
+
+
+def compute_position_value_by_round(vorp_df, min_sample=3):
+    """
+    Average VORP and typical positional finish for every round x position
+    - the whole landscape at a glance. This is what answers "does a
+    round-10 QB beat QBs taken in other rounds", because every cell is
+    measured against the same positional replacement level rather than
+    against the other picks in that round.
+    """
+    if vorp_df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+
+    def _mean(s):
+        return s.mean() if len(s) >= min_sample else np.nan
+
+    def _median(s):
+        return s.median() if len(s) >= min_sample else np.nan
+
+    vorp = vorp_df.pivot_table(index='round', columns='position', values='vorp', aggfunc=_mean)
+    finish = vorp_df.pivot_table(
+        index='round', columns='position', values='pos_rank', aggfunc=_median
+    )
+    order = [p for p in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] if p in vorp.columns]
+    return vorp[order].round(0), finish[order].round(0)
+
+
+def vorp_cell_style(value, low=-60.0, high=120.0):
+    """
+    Red-to-green background for a VORP cell, written by hand rather than
+    via Styler.background_gradient - that needs matplotlib, which isn't
+    a dependency of this app and isn't worth adding for one table.
+    """
+    if pd.isna(value):
+        return ''
+    if value >= 0:
+        weight = min(value / high, 1.0) if high else 0.0
+        return f'background-color: rgba(0, 165, 120, {0.10 + 0.45 * weight:.2f})'
+    weight = min(value / low, 1.0) if low else 0.0
+    return f'background-color: rgba(232, 92, 58, {0.10 + 0.45 * weight:.2f})'
+
+
 def compute_slot_blueprint(draft_df, slot, n_teams, n_rounds=16, window=3):
     """
-    For each pick the slot owns, rank positions by how well they've
-    worked at that spot historically.
+    For each pick the slot owns, rank positions by the value they've
+    actually returned there - average VORP across every pick within
+    +/-`window` overall picks, in every year of draft_df.
 
-    Two ingredients per position, measured over every pick within
-    +/-`window` overall picks across all years in draft_df:
-      availability - how often that position was actually taken there
-      hit rate     - how often the player taken beat that position's
-                     average score for that season
+    Ranking on VORP rather than a hit rate against the position's own
+    average fixes a real flaw: "beat your position's average" is cleared
+    by 84% of all round-1 picks regardless of position, so it carried
+    almost no information early. VORP has no such floor - it says how
+    many points above a freely-available replacement the pick returned,
+    which is the same question in round 1 and round 16.
 
-    confidence = 0.45*availability + 0.55*hit, pulled toward 50% by
-    n/(n+4) so a 3-pick sample can't masquerade as a certainty. It's a
-    weighting heuristic for ranking options, not a calibrated
-    probability.
+    Each option also reports the typical positional finish at that slot
+    (e.g. QB14), so you can see what tier of player the pick actually
+    buys, and best_round/best_round_vorp for that position across the
+    whole draft, so you can see whether this is the right time to take it.
     """
     if draft_df.empty:
         return []
 
-    d = draft_df.copy()
-    pos_year_avg = d.groupby(['position', 'year'])['season_points'].mean().rename('pos_year_avg')
-    d = d.merge(pos_year_avg, on=['position', 'year'])
-    d['beat_avg'] = d['season_points'] > d['pos_year_avg']
+    d = calculate_draft_vorp(draft_df, n_teams)
+
+    # Where each position peaks across the whole draft, for "take it now
+    # or wait" context.
+    by_round = d.groupby(['position', 'round'])['vorp'].agg(['mean', 'size'])
+    by_round = by_round[by_round['size'] >= 3]
+    peak = {}
+    for pos in d['position'].unique():
+        sub = by_round.loc[pos] if pos in by_round.index.get_level_values(0) else None
+        if sub is not None and not sub.empty:
+            best = sub['mean'].idxmax()
+            peak[pos] = (int(best), round(sub['mean'].max()))
 
     blueprint = []
     for pick in compute_snake_picks(slot, n_teams, n_rounds):
@@ -994,25 +1089,34 @@ def compute_slot_blueprint(draft_df, slot, n_teams, n_rounds=16, window=3):
         near = d[(d['pick'] >= overall - window) & (d['pick'] <= overall + window)]
         total = len(near)
 
+        # Baseline for this pick: what the average pick here returns,
+        # regardless of position. Thin positional samples get pulled
+        # toward it so a lucky 3-pick run can't outrank a position with
+        # a dozen observations behind it.
+        pooled = near['vorp'].mean() if len(near) else 0.0
+
         options = []
         for pos, grp in near.groupby('position'):
             n = len(grp)
-            if n < 3 or pos == 'Unknown':
+            if n < 3:
                 continue
-            availability = n / total
-            hit = grp['beat_avg'].mean()
-            raw = 0.45 * availability + 0.55 * hit
-            confidence = 0.5 + (raw - 0.5) * (n / (n + 4))
+            raw_vorp = grp['vorp'].mean()
+            shrunk_vorp = pooled + (raw_vorp - pooled) * (n / (n + 4))
+            best_round, best_vorp = peak.get(pos, (None, None))
             options.append({
                 'position': pos,
-                'confidence': round(confidence * 100),
-                'availability': round(availability * 100),
-                'hit_rate': round(hit * 100),
+                'vorp': round(shrunk_vorp),
+                'raw_vorp': round(raw_vorp),
+                'typical_finish': int(grp['pos_rank'].median()),
+                'above_replacement_pct': round((grp['vorp'] > 0).mean() * 100),
+                'availability': round(n / total * 100) if total else 0,
                 'sample': n,
                 'avg_points': round(grp['season_points'].mean()),
+                'best_round': best_round,
+                'best_round_vorp': best_vorp,
             })
 
-        options.sort(key=lambda o: -o['confidence'])
+        options.sort(key=lambda o: -o['vorp'])
         blueprint.append({**pick, 'options': options})
 
     return blueprint
@@ -1060,9 +1164,8 @@ def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
                 'player_name': pick_row['player_name'],
                 'position': option['position'],
                 'adp': pick_row['adp'],
-                'confidence': option['confidence'],
-                'hit_rate': option['hit_rate'],
-                'avg_points': option['avg_points'],
+                'vorp': option['vorp'],
+                'typical_finish': option['typical_finish'],
                 'sample': option['sample'],
             })
 
@@ -1079,9 +1182,8 @@ def build_2026_draft_plan(draft_df, adp_df, slot, n_teams, n_rounds=16):
                 'player_name': pick_row['player_name'],
                 'position': pick_row['position'],
                 'adp': pick_row['adp'],
-                'confidence': match['confidence'] if match else None,
-                'hit_rate': match['hit_rate'] if match else None,
-                'avg_points': match['avg_points'] if match else None,
+                'vorp': match['vorp'] if match else None,
+                'typical_finish': match['typical_finish'] if match else None,
                 'sample': match['sample'] if match else None,
             })
 
@@ -1103,9 +1205,10 @@ def render_draft_plan_html(plan, has_adp):
     .plan-ov { font-size: 11px; opacity: .7; border: 1px solid rgba(128,128,128,0.4);
                border-radius: 3px; padding: 1px 5px; font-variant-numeric: tabular-nums; }
     .plan-conf { margin-left: auto; display: flex; align-items: center; gap: 6px; }
-    .plan-conf-n { font-size: 12px; font-weight: 600; opacity: .85; font-variant-numeric: tabular-nums; }
-    .plan-bar { width: 52px; height: 5px; border-radius: 3px; background: rgba(128,128,128,0.3); overflow: hidden; }
-    .plan-fill { height: 100%; background: #636EFA; border-radius: 3px; }
+    .plan-vorp { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 3px;
+                 font-variant-numeric: tabular-nums; }
+    .plan-vorp.pos { background: rgba(0,165,120,.16); color: #00A578; }
+    .plan-vorp.neg { background: rgba(232,131,58,.16); color: #E8833A; }
     .plan-why { padding: 7px 12px; font-size: 12.5px; opacity: .8;
                 border-bottom: 1px solid rgba(128,128,128,0.25); }
     .plan-target { display: grid; grid-template-columns: 42px 1fr auto; gap: 10px;
@@ -1129,21 +1232,31 @@ def render_draft_plan_html(plan, has_adp):
 
     for row in plan:
         top = row['options'][0] if row['options'] else None
-        conf = top['confidence'] if top else 0
+        vorp = top['vorp'] if top else 0
+        v_cls = 'pos' if vorp > 0 else 'neg'
         parts.append('<div class="plan-round">')
         parts.append(
             f'<div class="plan-head"><span class="plan-rd">Round {row["round"]}</span>'
             f'<span class="plan-ov">pick {row["overall"]} overall</span>'
-            f'<span class="plan-conf"><span class="plan-conf-n">{conf}%</span>'
-            f'<span class="plan-bar"><span class="plan-fill" style="width:{conf}%"></span></span>'
+            f'<span class="plan-conf">'
+            f'<span class="plan-vorp {v_cls}">{vorp:+.0f} VORP</span>'
             f'</span></div>'
         )
 
         if top:
+            wait = ''
+            if top['best_round'] and top['best_round'] > row['round'] + 1 \
+                    and top['best_round_vorp'] > top['vorp']:
+                wait = (f' {html.escape(top["position"])} peaks in round '
+                        f'{top["best_round"]} ({top["best_round_vorp"]:+.0f}) — you can wait.')
+            elif top['best_round'] and top['best_round'] < row['round'] - 1:
+                wait = (f' {html.escape(top["position"])} was best in round '
+                        f'{top["best_round"]} ({top["best_round_vorp"]:+.0f}).')
             parts.append(
-                f'<div class="plan-why">Historically at this pick: <b>{html.escape(top["position"])}</b> '
-                f'taken {top["availability"]}% of the time, beating its position average '
-                f'{top["hit_rate"]}% of the time for {top["avg_points"]} pts (n={top["sample"]}).</div>'
+                f'<div class="plan-why">Best value here: <b>{html.escape(top["position"])}</b> at '
+                f'<b>{top["vorp"]:+.0f} points above replacement</b>, typically finishing as '
+                f'{html.escape(top["position"])}{top["typical_finish"]} '
+                f'({top["above_replacement_pct"]}% clear replacement, n={top["sample"]}).{wait}</div>'
             )
 
         if row['targets']:
@@ -1151,8 +1264,8 @@ def render_draft_plan_html(plan, has_adp):
                 color = POSITION_COLORS.get(t['position'], '#999999')
                 text_color = _readable_text_color(color)
                 sub = (
-                    f'{t["hit_rate"]}% hit rate here across {t["sample"]} picks'
-                    if t['hit_rate'] is not None else 'best available on the board'
+                    f'{t["vorp"]:+.0f} VORP here · typically {t["position"]}{t["typical_finish"]}'
+                    if t['vorp'] is not None else 'best available on the board'
                 )
                 # ADP relative to the pick you actually own: a player whose
                 # ADP sits well after your pick is one you'd be reaching for
@@ -1177,7 +1290,7 @@ def render_draft_plan_html(plan, has_adp):
                 )
         elif not has_adp:
             alts = ", ".join(
-                f'{o["position"]} {o["confidence"]}%' for o in row['options'][:3]
+                f'{o["position"]} {o["vorp"]:+.0f}' for o in row['options'][:3]
             )
             parts.append(
                 f'<div class="plan-empty">Position call ready — add ADP to name players. '

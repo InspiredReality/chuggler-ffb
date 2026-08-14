@@ -13,6 +13,9 @@ from dashboard_common import (
     load_adp_for_year,
     build_2026_draft_plan,
     render_draft_plan_html,
+    calculate_draft_vorp,
+    compute_position_value_by_round,
+    vorp_cell_style,
     POSITION_COLORS,
 )
 
@@ -370,17 +373,52 @@ else:
 
         st.markdown(render_draft_plan_html(plan, has_adp), unsafe_allow_html=True)
 
-        with st.expander("How confidence is calculated"):
+        st.markdown("---")
+        st.subheader("📐 Position value by round")
+        st.write(
+            "Every cell is measured against the same replacement-level player at that position, "
+            "so it answers *what tier of player does this round buy* — not just how a pick "
+            "compared to others taken in the same round. A round-10 QB and a round-1 QB are "
+            "scored against the same replacement QB."
+        )
+
+        vorp_df = calculate_draft_vorp(draft_df, n_teams)
+        vorp_tbl, finish_tbl = compute_position_value_by_round(vorp_df)
+
+        st.caption("**Average points above replacement** (green = worth the pick, red = below a freely-available player)")
+        st.dataframe(
+            vorp_tbl.style.format("{:.0f}", na_rep="—").map(vorp_cell_style),
+            use_container_width=True,
+        )
+
+        st.caption("**Typical finish within the position** (median — e.g. `8` under QB means that round's QBs usually end up as QB8 that season)")
+        st.dataframe(finish_tbl.style.format("{:.0f}", na_rep="—"), use_container_width=True)
+
+        with st.expander("How these numbers are calculated"):
             st.markdown(
-                "Every pick you own is located in the league's draft history, with a window of "
-                "±3 overall picks around it. Within that window two things are measured:\n\n"
-                "- **Availability** — how often that position was actually taken there\n"
-                "- **Hit rate** — how often the player taken beat that position's average "
-                "score for that season\n\n"
-                "Confidence is `0.45 × availability + 0.55 × hit rate`, then pulled toward 50% "
-                "in proportion to sample size (`n / (n+4)`) so a 3-pick sample can't masquerade "
-                "as a certainty. It ranks options against each other — read it as signal "
-                "strength, not as a probability.\n\n"
-                "Suggestions per round scale with uncertainty: 1 for rounds 1–3, 2 for rounds "
-                "4–7, 3 from round 8 on."
+                "**Value over replacement (VORP)** is a player's season points minus the "
+                "replacement-level score at his position that year — replacement being the last "
+                "player who'd realistically be in a starting lineup. In a "
+                f"{n_teams}-team superflex that's roughly QB{int(2.0 * n_teams)}, "
+                f"RB{int(2.5 * n_teams)}, WR{int(3.5 * n_teams)}, TE{n_teams}, K{n_teams}, "
+                f"DEF{n_teams}. Everything below that is free off waivers, so points above it "
+                "are what the pick was actually worth.\n\n"
+                "This replaced an earlier hit-rate measure that asked whether a pick beat its "
+                "own position's average. That bar was cleared by **84% of all round-1 picks** "
+                "regardless of position, so it carried almost no information early in the draft. "
+                "VORP has no such floor — it asks the same question in round 1 and round 16.\n\n"
+                "**Typical finish** is the median positional rank players taken in that round "
+                "actually achieved. It's the honest answer to *\"will a round-10 QB outscore QBs "
+                "taken in other rounds\"*: read down the QB column and compare.\n\n"
+                "Cells with fewer than 3 historical picks are left blank rather than shown as a "
+                "one-sample certainty, and in the round-by-round plan above, a position's VORP "
+                "is pulled toward that pick's overall average in proportion to sample size "
+                "(`n / (n+4)`) so a lucky 3-pick run can't outrank a position with a dozen "
+                "observations behind it. Both the shrunk and raw figures are shown.\n\n"
+                "⚠️ **K and DEF are overstated here.** Replacement is computed from drafted "
+                "players only, and since about one kicker per team gets drafted, the "
+                "replacement kicker ends up being the *worst drafted* kicker rather than the "
+                "freely-available waiver kicker who scores about the same. Treat K/DEF VORP as "
+                "an upper bound — the real edge from picking a kicker early is close to zero.\n\n"
+                "Suggestions per round: 1 for rounds 1–3, 2 for rounds 4–7, 3 from round 8 on."
             )
