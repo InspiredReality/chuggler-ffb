@@ -102,7 +102,7 @@ def add_trendline_if_available(fig, df, x_col, y_col):
 @st.cache_data
 def load_all_data():
     """Load all CSV files from data folder"""
-    data_dir = Path("data")
+    data_dir = Path("ff-dash/data")
     file_path = "ff-dash/data/2021-2024_stats.csv"
     master_df = pd.read_csv(file_path)
 
