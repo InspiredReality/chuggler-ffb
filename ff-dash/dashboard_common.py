@@ -747,13 +747,21 @@ def create_draft_position_grid_html(draft_df, selected_positions):
     df['n_slots'] = df['year'].map(teams_per_year)
     df['pick_in_round'] = ((df['pick'] - 1) % df['n_slots']) + 1
 
+    # Rank/average within each (position, year) across every drafted
+    # player at that spot that year - independent of selected_positions,
+    # so the ⭐/💩 benchmark doesn't shift as positions are toggled.
+    df['pos_year_rank'] = df.groupby(['position', 'year'])['season_points'].rank(
+        method='min', ascending=False
+    )
+    df['pos_year_avg'] = df.groupby(['position', 'year'])['season_points'].transform('mean')
+
     years = sorted(df['year'].unique())
     rounds = sorted(df['round'].unique())
     n_slots = int(df['n_slots'].max())
     slots = list(range(1, n_slots + 1))
 
     lookup = df.set_index(['year', 'round', 'pick_in_round'])[
-        ['position', 'player_name', 'team_name', 'season_points']
+        ['position', 'player_name', 'team_name', 'season_points', 'pos_year_rank', 'pos_year_avg']
     ].to_dict('index')
 
     parts = ['''
@@ -779,6 +787,7 @@ def create_draft_position_grid_html(draft_df, selected_positions):
     parts.append(f'<div class="draft-legend-item"><strong>Years per cell (top→bottom):</strong> {" → ".join(str(y) for y in years)}</div>')
     parts.append('<div class="draft-legend-item">Number shown = total fantasy points that season</div>')
     parts.append('<div class="draft-legend-item">Tap (or hover) a swatch for player details</div>')
+    parts.append('<div class="draft-legend-item">⭐ = top 5 at that position that year · 💩 = below that position\'s average that year</div>')
     parts.append('</div>')
 
     parts.append('<div class="draft-grid-wrap"><table class="draft-grid"><thead><tr><th>Round</th>')
@@ -797,15 +806,25 @@ def create_draft_position_grid_html(draft_df, selected_positions):
                     text_color = _readable_text_color(color)
                     pts = entry['season_points']
                     pts_label = f"{pts:.0f}" if pd.notna(pts) else "–"
+
+                    marker = ''
+                    marker_note = ''
+                    if pd.notna(pts) and pd.notna(entry['pos_year_rank']) and entry['pos_year_rank'] <= 5:
+                        marker = ' ⭐'
+                        marker_note = ' - top 5 at position that year'
+                    elif pd.notna(pts) and pd.notna(entry['pos_year_avg']) and pts < entry['pos_year_avg']:
+                        marker = ' 💩'
+                        marker_note = ' - below position average that year'
+
                     player = html.escape(str(entry['player_name']))
                     team = html.escape(str(entry['team_name']))
                     pos = html.escape(str(entry['position']))
-                    title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']} - {pts_label} pts"
+                    title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']} - {pts_label} pts{marker_note}"
                     parts.append(
                         f'<details name="draft-popup" class="draft-swatch-detail">'
-                        f'<summary style="background:{color};color:{text_color}" title="{html.escape(title)}">{html.escape(pts_label)}</summary>'
+                        f'<summary style="background:{color};color:{text_color}" title="{html.escape(title)}">{html.escape(pts_label)}{marker}</summary>'
                         f'<div class="draft-swatch-popup">'
-                        f'<strong>{player}</strong><br>{pos} · {team}<br>{yr} R{rnd} Pick {s}<br>{html.escape(pts_label)} pts'
+                        f'<strong>{player}</strong><br>{pos} · {team}<br>{yr} R{rnd} Pick {s}<br>{html.escape(pts_label)} pts{marker}{html.escape(marker_note)}'
                         f'</div>'
                         f'</details>'
                     )
