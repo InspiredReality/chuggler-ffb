@@ -210,30 +210,26 @@ else:
         if not adp_df.empty:
             steals, reaches = analyze_draft_value_picks(draft_df, adp_df, selected_years)
 
-            col1, col2 = st.columns(2)
+            st.write("**🏆 Biggest Steals vs ADP**")
+            if not steals.empty:
+                steal_display = steals[['player_name', 'pick', 'AVG Draft Position', 'adp_diff', 'season_points', 'team_name', 'year']]
+                steal_display.columns = ['Player', 'Your Pick', 'ADP', 'Rounds Later', 'Points', 'Team', 'Year']
+                st.dataframe(steal_display)
+            else:
+                st.info("No significant steals found")
 
-            with col1:
-                st.write("**🏆 Biggest Steals vs ADP**")
-                if not steals.empty:
-                    steal_display = steals[['player_name', 'pick', 'AVG Draft Position', 'adp_diff', 'season_points', 'team_name', 'year']]
-                    steal_display.columns = ['Player', 'Your Pick', 'ADP', 'Rounds Later', 'Points', 'Team', 'Year']
-                    st.dataframe(steal_display)
-                else:
-                    st.info("No significant steals found")
-
-            with col2:
-                st.write("**💸 Biggest Reaches vs ADP**")
-                if not reaches.empty:
-                    reach_display = reaches[['player_name', 'pick', 'AVG Draft Position', 'adp_diff', 'season_points', 'team_name', 'year']]
-                    reach_display.columns = ['Player', 'Your Pick', 'ADP', 'Rounds Early', 'Points', 'Team', 'Year']
-                    st.dataframe(reach_display)
-                else:
-                    st.info("No significant reaches found")
+            st.write("**💸 Biggest Reaches vs ADP**")
+            if not reaches.empty:
+                reach_display = reaches[['player_name', 'pick', 'AVG Draft Position', 'adp_diff', 'season_points', 'team_name', 'year']]
+                reach_display.columns = ['Player', 'Your Pick', 'ADP', 'Rounds Early', 'Points', 'Team', 'Year']
+                st.dataframe(reach_display)
+            else:
+                st.info("No significant reaches found")
 
             # ADP accuracy analysis
             st.subheader("🎯 League vs ADP Accuracy")
 
-            league_vs_adp = draft_df.merge(
+            league_vs_adp = draft_df[draft_df['position'].isin(selected_positions)].merge(
                 adp_df[adp_df['year'].isin(selected_years)][['Player', 'AVG Draft Position', 'year']],
                 left_on=['player_name', 'year'],
                 right_on=['Player', 'year'],

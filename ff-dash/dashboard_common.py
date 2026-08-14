@@ -673,12 +673,12 @@ def analyze_draft_value_picks(draft_df, adp_df, selected_years):
     steals = draft_with_adp[
         (draft_with_adp['adp_diff'] > 12) &  # Drafted 12+ picks later than ADP
         (draft_with_adp['season_points'] > draft_with_adp['season_points'].quantile(0.6))
-    ].nlargest(10, 'value_score')
+    ].nlargest(100, 'value_score')
 
     reaches = draft_with_adp[
         (draft_with_adp['adp_diff'] < -12) &  # Drafted 12+ picks earlier than ADP
         (draft_with_adp['season_points'] < draft_with_adp['season_points'].quantile(0.4))
-    ].nsmallest(10, 'value_score')
+    ].nsmallest(100, 'value_score')
 
     return steals, reaches
 
