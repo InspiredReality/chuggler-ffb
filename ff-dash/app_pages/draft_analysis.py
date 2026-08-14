@@ -14,12 +14,14 @@ from dashboard_common import (
 )
 
 master_df, adp_df = load_all_data()
+draft_df = load_draft_data()
 
 if master_df.empty:
     st.error("❌ No data found! Make sure your CSV files are in the 'data' folder.")
     st.stop()
 
-selected_years, selected_positions = render_sidebar_filters(master_df)
+draft_years = draft_df['year'].unique() if not draft_df.empty else None
+selected_years, selected_positions = render_sidebar_filters(master_df, extra_years=draft_years)
 
 if not selected_years or not selected_positions:
     st.warning("⚠️ Please select at least one year and position.")
@@ -29,8 +31,6 @@ filtered_df = apply_filters(master_df, selected_years, selected_positions)
 render_data_summary(filtered_df)
 
 st.header("📈 Draft Analysis")
-
-draft_df = load_draft_data()
 
 if draft_df.empty:
     st.info("🔄 Draft data not available yet.")
@@ -73,7 +73,7 @@ else:
         # Draft position vs performance scatterplot
         try:
             fig_league_scatter = create_draft_scatterplot_with_dynamic_trendline(
-                draft_df, selected_positions
+                draft_df, selected_positions, selected_years
             )
             st.plotly_chart(fig_league_scatter, use_container_width=True, key="draft-scatterplot")
 

@@ -195,7 +195,7 @@ def guess_missing_positions(df):
     return df
 
 
-def render_sidebar_filters(master_df):
+def render_sidebar_filters(master_df, extra_years=None):
     """
     Renders the year/position sidebar controls and persists the selection
     in st.session_state so it survives navigation between pages.
@@ -207,11 +207,16 @@ def render_sidebar_filters(master_df):
     here - is a separate "persist" key that isn't owned by any widget,
     combined with `value=` + `on_change` to keep it in sync with the
     widget on every rerun.
+
+    extra_years: years to offer as selectable in addition to whatever's
+    in master_df - e.g. draft_analysis.py passes draft_df's years, since
+    draft data can be ahead of the weekly stats file (a season's draft
+    happens before any weekly stats exist for it).
     """
     st.sidebar.header("🎛️ Controls")
 
     st.sidebar.subheader("📅 Select Years")
-    years = sorted(master_df['year'].unique())
+    years = sorted(set(master_df['year'].unique()) | set(extra_years or []))
 
     cols = st.sidebar.columns(len(years))
     selected_years = []
@@ -630,11 +635,14 @@ def analyze_draft_value_picks(draft_df, adp_df, selected_years):
     return steals, reaches
 
 
-def create_draft_scatterplot_with_dynamic_trendline(draft_df, selected_positions):
+def create_draft_scatterplot_with_dynamic_trendline(draft_df, selected_positions, selected_years):
     """
     Create draft scatterplot with trend line that updates based on selected positions
     """
-    filtered_draft_df = draft_df[draft_df['position'].isin(selected_positions)]
+    filtered_draft_df = draft_df[
+        draft_df['position'].isin(selected_positions) &
+        draft_df['year'].isin(selected_years)
+    ]
 
     if filtered_draft_df.empty:
         return go.Figure().add_annotation(
