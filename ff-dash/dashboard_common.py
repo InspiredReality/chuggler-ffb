@@ -758,13 +758,17 @@ def create_draft_position_grid_html(draft_df, selected_positions):
 
     parts = ['''
     <style>
-    .draft-grid-wrap { overflow-x: auto; }
+    .draft-grid-wrap { overflow-x: auto; overflow-y: visible; }
     .draft-grid { border-collapse: collapse; font-size: 12px; }
     .draft-grid th, .draft-grid td { border: 1px solid rgba(128,128,128,0.3); padding: 3px; text-align: center; vertical-align: top; }
     .draft-grid th { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
     .draft-round-label { background: rgba(128,128,128,0.15); font-weight: 600; white-space: nowrap; }
     .draft-cell { display: flex; flex-direction: column; gap: 2px; }
-    .draft-swatch { min-width: 40px; padding: 1px 4px; border-radius: 3px; font-size: 10px; line-height: 15px; white-space: nowrap; }
+    .draft-swatch-detail { position: relative; }
+    .draft-swatch-detail > summary { min-width: 40px; padding: 1px 4px; border-radius: 3px; font-size: 10px; line-height: 15px; white-space: nowrap; cursor: pointer; list-style: none; }
+    .draft-swatch-detail > summary::-webkit-details-marker { display: none; }
+    .draft-swatch-detail > summary::marker { content: ''; }
+    .draft-swatch-popup { position: absolute; top: 100%; left: 0; z-index: 50; background: rgba(20,20,20,0.97); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 4px; padding: 6px 8px; font-size: 11px; line-height: 1.5; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-top: 2px; text-align: left; }
     .draft-swatch-empty { min-width: 40px; height: 17px; border-radius: 3px; border: 1px dashed rgba(128,128,128,0.25); }
     .draft-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 12px 0; font-size: 12px; }
     .draft-legend-item { display: flex; align-items: center; gap: 4px; }
@@ -774,6 +778,7 @@ def create_draft_position_grid_html(draft_df, selected_positions):
     parts.append('<div class="draft-legend">')
     parts.append(f'<div class="draft-legend-item"><strong>Years per cell (top→bottom):</strong> {" → ".join(str(y) for y in years)}</div>')
     parts.append('<div class="draft-legend-item">Number shown = total fantasy points that season</div>')
+    parts.append('<div class="draft-legend-item">Tap (or hover) a swatch for player details</div>')
     parts.append('</div>')
 
     parts.append('<div class="draft-grid-wrap"><table class="draft-grid"><thead><tr><th>Round</th>')
@@ -792,9 +797,17 @@ def create_draft_position_grid_html(draft_df, selected_positions):
                     text_color = _readable_text_color(color)
                     pts = entry['season_points']
                     pts_label = f"{pts:.0f}" if pd.notna(pts) else "–"
+                    player = html.escape(str(entry['player_name']))
+                    team = html.escape(str(entry['team_name']))
+                    pos = html.escape(str(entry['position']))
                     title = f"{yr} R{rnd} Pick {s}: {entry['player_name']} ({entry['position']}) - {entry['team_name']} - {pts_label} pts"
                     parts.append(
-                        f'<div class="draft-swatch" style="background:{color};color:{text_color}" title="{html.escape(title)}">{html.escape(pts_label)}</div>'
+                        f'<details name="draft-popup" class="draft-swatch-detail">'
+                        f'<summary style="background:{color};color:{text_color}" title="{html.escape(title)}">{html.escape(pts_label)}</summary>'
+                        f'<div class="draft-swatch-popup">'
+                        f'<strong>{player}</strong><br>{pos} · {team}<br>{yr} R{rnd} Pick {s}<br>{html.escape(pts_label)} pts'
+                        f'</div>'
+                        f'</details>'
                     )
                 else:
                     parts.append('<div class="draft-swatch-empty"></div>')
