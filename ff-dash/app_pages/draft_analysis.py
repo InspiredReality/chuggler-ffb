@@ -11,6 +11,7 @@ from dashboard_common import (
     create_draft_scatterplot_with_dynamic_trendline,
     create_draft_position_grid_html,
     load_adp_for_year,
+    adp_file_status,
     build_2026_draft_plan,
     render_draft_plan_html,
     calculate_draft_vorp,
@@ -358,13 +359,26 @@ else:
         if has_adp:
             st.caption(f"ADP board: {len(adp_2026)} players loaded from `data/ADP_2026.csv`.")
         else:
-            st.warning(
-                "📋 **No 2026 ADP board yet.** The position calls and confidence below are ready "
-                "— they come from your league's draft history and don't need ADP. Add "
-                "`ff-dash/data/ADP_2026.csv` (columns: `Player`, `Pos`, `AVG Draft Position` — "
-                "same format as the existing ADP files) and this tab will name real players at "
-                "every pick, rookies included."
-            )
+            status = adp_file_status(2026)
+            if status['state'] == 'ok':
+                st.error(
+                    f"📋 **Found `{status['path']}` but couldn't read it as an ADP board.** "
+                    f"Columns present: `{', '.join(status['columns'])}`. Needs a player-name "
+                    f"column (`Player`), a position column (`Pos`), and an ADP column "
+                    f"(`AVG Draft Position`). Position calls below still work without it."
+                )
+            elif status['state'] == 'unreadable':
+                st.error(
+                    f"📋 **`{status['path']}` couldn't be parsed as CSV:** {status.get('error', '')}"
+                )
+            else:
+                st.warning(
+                    "📋 **No 2026 ADP board yet.** The position calls below are ready — they "
+                    "come from your league's draft history and don't need ADP. Add "
+                    "`ff-dash/data/ADP_2026.csv` (columns: `Player`, `Pos`, `AVG Draft "
+                    "Position` — same format as the existing ADP files) and this tab will name "
+                    "real players at every pick, rookies included."
+                )
 
         plan = build_2026_draft_plan(draft_df, adp_2026, int(slot), n_teams, int(n_rounds))
 

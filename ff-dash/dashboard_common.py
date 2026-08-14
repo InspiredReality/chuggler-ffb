@@ -919,6 +919,23 @@ def normalize_adp_position(pos):
     return 'Unknown'
 
 
+def adp_file_status(year):
+    """
+    Distinguish "no ADP file" from "file is there but I couldn't read the
+    columns". load_adp_for_year() returns an empty frame either way, and
+    showing the same "add the file" message when the file already exists
+    sends you looking in the wrong place.
+    """
+    path = Path(f"ff-dash/data/ADP_{year}.csv")
+    if not path.exists():
+        return {'state': 'missing', 'path': str(path), 'columns': []}
+    try:
+        columns = list(pd.read_csv(path, nrows=0).columns)
+    except Exception as exc:  # unreadable/corrupt CSV
+        return {'state': 'unreadable', 'path': str(path), 'columns': [], 'error': str(exc)}
+    return {'state': 'ok', 'path': str(path), 'columns': columns}
+
+
 @st.cache_data
 def load_adp_for_year(year):
     """
