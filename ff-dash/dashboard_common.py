@@ -195,7 +195,7 @@ def guess_missing_positions(df):
     return df
 
 
-def render_sidebar_filters(master_df, extra_years=None):
+def render_sidebar_filters(master_df):
     """
     Renders the year/position sidebar controls and persists the selection
     in st.session_state so it survives navigation between pages.
@@ -208,15 +208,17 @@ def render_sidebar_filters(master_df, extra_years=None):
     combined with `value=` + `on_change` to keep it in sync with the
     widget on every rerun.
 
-    extra_years: years to offer as selectable in addition to whatever's
-    in master_df - e.g. draft_analysis.py passes draft_df's years, since
-    draft data can be ahead of the weekly stats file (a season's draft
-    happens before any weekly stats exist for it).
+    The year list is master_df's years unioned with load_draft_data()'s
+    years, not just master_df's - draft data can be ahead of the weekly
+    stats file (a season's draft happens before any weekly stats exist
+    for it), and this way every page offers the same year list
+    automatically instead of each page having to opt in separately.
     """
     st.sidebar.header("🎛️ Controls")
 
     st.sidebar.subheader("📅 Select Years")
-    extra_years_set = set(extra_years) if extra_years is not None else set()
+    draft_df_years = load_draft_data()
+    extra_years_set = set(draft_df_years['year'].unique()) if not draft_df_years.empty else set()
     years = sorted(set(master_df['year'].unique()) | extra_years_set)
 
     cols = st.sidebar.columns(len(years))

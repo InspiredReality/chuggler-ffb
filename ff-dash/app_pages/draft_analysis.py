@@ -20,8 +20,7 @@ if master_df.empty:
     st.error("❌ No data found! Make sure your CSV files are in the 'data' folder.")
     st.stop()
 
-draft_years = draft_df['year'].unique() if not draft_df.empty else None
-selected_years, selected_positions = render_sidebar_filters(master_df, extra_years=draft_years)
+selected_years, selected_positions = render_sidebar_filters(master_df)
 
 if not selected_years or not selected_positions:
     st.warning("⚠️ Please select at least one year and position.")
