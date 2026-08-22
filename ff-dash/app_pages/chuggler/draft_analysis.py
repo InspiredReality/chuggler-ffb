@@ -376,7 +376,7 @@ else:
                 st.warning(
                     "📋 **No 2026 ADP board yet.** The position calls below are ready — they "
                     "come from your league's draft history and don't need ADP. Add "
-                    "`ff-dash/data/ADP_2026.csv` (columns: `Player`, `Pos`, `AVG Draft "
+                    "`ff-dash/data/chuggler/ADP_2026.csv` (columns: `Player`, `Pos`, `AVG Draft "
                     "Position` — same format as the existing ADP files) and this tab will name "
                     "real players at every pick, rookies included."
                 )
